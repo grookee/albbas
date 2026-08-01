@@ -1,5 +1,5 @@
 albbas.mateakos.com {
-	tls /certs/albbas.mateakos.com.pem /certs/albbas.mateakos.com.key
+	tls /certs/wildcard.mateakos.com.pem /certs/wildcard.mateakos.com.key
 	handle /api/* {
 		reverse_proxy api:3001
 	}
