@@ -1,10 +1,10 @@
-import { env } from '../env.js';
-import { createLocalStorage } from './local.js';
-import { createS3Storage } from './s3.js';
-import type { StorageBackend } from './types.js';
+import { env } from "../env.js";
+import { createLocalStorage } from "./local.js";
+import { createS3Storage } from "./s3.js";
+import type { StorageBackend } from "./types.js";
 
 export function createStorage(): StorageBackend {
-  if (env.STORAGE_BACKEND === 'local') {
+  if (env.STORAGE_BACKEND === "local") {
     return createLocalStorage(env.LOCAL_STORAGE_DIR);
   }
 

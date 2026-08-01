@@ -7,12 +7,12 @@ import {
   INVITE_CODE_GROUPS,
   SLUG_ALPHABET,
   SLUG_LENGTH,
-} from './constants.js';
+} from "./constants.js";
 
 function randomChars(length: number, alphabet: string): string {
   const bytes = new Uint32Array(length);
   crypto.getRandomValues(bytes);
-  let out = '';
+  let out = "";
   for (let i = 0; i < length; i++) {
     const index = bytes[i]! % alphabet.length;
     out += alphabet[index]!;
@@ -29,10 +29,14 @@ export function generateInviteCode(): string {
   for (let i = 0; i < INVITE_CODE_GROUPS; i++) {
     groups.push(randomChars(INVITE_CODE_GROUP_LENGTH, INVITE_CODE_ALPHABET));
   }
-  return groups.join('-');
+  return groups.join("-");
 }
 
-export function generateApiKey(): { prefix: string; raw: string; full: string } {
+export function generateApiKey(): {
+  prefix: string;
+  raw: string;
+  full: string;
+} {
   const raw = randomChars(API_KEY_LENGTH, API_KEY_ALPHABET);
   return { prefix: raw.slice(0, 8), raw, full: `${API_KEY_PREFIX}${raw}` };
 }

@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import { ALLOWED_DOMAINS, SUBDOMAIN_PATTERN } from './constants.js';
+import { z } from "zod";
+import { ALLOWED_DOMAINS, SUBDOMAIN_PATTERN } from "./constants.js";
 
 export const emailSchema = z
   .string()
@@ -8,7 +8,7 @@ export const emailSchema = z
   .min(3)
   .max(255)
   .email()
-  .refine((v) => v.length <= 255, 'Email too long');
+  .refine((v) => v.length <= 255, "Email too long");
 
 export const passwordSchema = z.string().min(8).max(200);
 
@@ -27,7 +27,7 @@ export const registerSchema = z.object({
     .toUpperCase()
     .min(4)
     .max(64)
-    .regex(/^[A-Z0-9-]+$/, 'Invalid invite code format'),
+    .regex(/^[A-Z0-9-]+$/, "Invalid invite code format"),
 });
 export type RegisterInput = z.infer<typeof registerSchema>;
 
@@ -38,13 +38,15 @@ export const domainSelectionSchema = z.object({
     .trim()
     .toLowerCase()
     .max(63)
-    .regex(SUBDOMAIN_PATTERN, 'Invalid subdomain')
+    .regex(SUBDOMAIN_PATTERN, "Invalid subdomain")
     .optional(),
 });
 export type DomainSelection = z.infer<typeof domainSelectionSchema>;
 
 export function baseUrlFor(selection: DomainSelection): string {
-  const host = selection.subdomain ? `${selection.subdomain}.${selection.domain}` : selection.domain;
+  const host = selection.subdomain
+    ? `${selection.subdomain}.${selection.domain}`
+    : selection.domain;
   return `https://${host}`;
 }
 

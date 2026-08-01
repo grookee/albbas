@@ -24,7 +24,8 @@
   --orange: #d65d0e;
   --orange-b: #fe8019;
 
-  --font-mono: ui-monospace, 'Cascadia Code', 'JetBrains Mono', Menlo, Consolas, monospace;
+  --font-mono:
+    ui-monospace, "Cascadia Code", "JetBrains Mono", Menlo, Consolas, monospace;
   --radius: 3px;
 }
 
@@ -115,7 +116,10 @@ hr {
   border: 1px solid transparent;
   cursor: pointer;
   text-decoration: none;
-  transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease,
+    border-color 120ms ease;
 }
 
 .btn:disabled {
@@ -429,7 +433,10 @@ main.container {
   text-align: center;
   color: var(--fg2);
   cursor: pointer;
-  transition: border-color 120ms ease, color 120ms ease, background-color 120ms ease;
+  transition:
+    border-color 120ms ease,
+    color 120ms ease,
+    background-color 120ms ease;
 }
 
 .dropzone:hover {
@@ -443,7 +450,7 @@ main.container {
   color: var(--fg0);
 }
 
-.dropzone input[type='file'] {
+.dropzone input[type="file"] {
   display: none;
 }
 

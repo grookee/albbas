@@ -1,3 +1,5 @@
+name: albbas-dev
+
 services:
   postgres:
     image: postgres:17-alpine
@@ -24,3 +26,4 @@ services:
 
 volumes:
   albbas-pg-data:
+    name: albbas_albbas-pg-data

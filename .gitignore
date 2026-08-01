@@ -11,3 +11,8 @@ build/
 coverage/
 *.log
 .DS_Store
+caddy/certs/*
+!caddy/certs/.gitkeep
+
+# local deployment notes (not for the repo)
+deploy/README.md

@@ -1,6 +1,6 @@
-import type { AllowedDomain } from './constants.js';
+import type { AllowedDomain } from "./constants.js";
 
-export type UserRole = 'USER' | 'ADMIN';
+export type UserRole = "USER" | "ADMIN";
 
 export interface PublicUser {
   id: string;

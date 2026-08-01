@@ -1,10 +1,10 @@
-import { TRPCClientError, createTRPCClient, httpBatchLink } from '@trpc/client';
-import type { AppRouter } from '@albbas/api/router';
+import { TRPCClientError, createTRPCClient, httpBatchLink } from "@trpc/client";
+import type { AppRouter } from "@albbas/api/router";
 
 export const trpc = createTRPCClient<AppRouter>({
   links: [
     httpBatchLink({
-      url: '/api/trpc',
+      url: "/api/trpc",
     }),
   ],
 });
@@ -12,5 +12,5 @@ export const trpc = createTRPCClient<AppRouter>({
 export function errorMessage(err: unknown): string {
   if (err instanceof TRPCClientError) return err.message;
   if (err instanceof Error) return err.message;
-  return 'Something went wrong';
+  return "Something went wrong";
 }

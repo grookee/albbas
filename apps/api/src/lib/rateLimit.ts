@@ -1,4 +1,4 @@
-import { getRedis } from './redis.js';
+import { getRedis } from "./redis.js";
 
 export async function isRateLimited(
   namespace: string,

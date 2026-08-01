@@ -1,7 +1,15 @@
-import { S3Client, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
-import { Upload } from '@aws-sdk/lib-storage';
-import type { Readable } from 'node:stream';
-import type { GetObjectResult, PutObjectInput, StorageBackend } from './types.js';
+import {
+  S3Client,
+  DeleteObjectCommand,
+  GetObjectCommand,
+} from "@aws-sdk/client-s3";
+import { Upload } from "@aws-sdk/lib-storage";
+import type { Readable } from "node:stream";
+import type {
+  GetObjectResult,
+  PutObjectInput,
+  StorageBackend,
+} from "./types.js";
 
 export interface S3Config {
   endpoint: string;
@@ -38,7 +46,9 @@ export function createS3Storage(config: S3Config): StorageBackend {
     },
 
     async get(key: string): Promise<GetObjectResult> {
-      const response = await client.send(new GetObjectCommand({ Bucket: config.bucket, Key: key }));
+      const response = await client.send(
+        new GetObjectCommand({ Bucket: config.bucket, Key: key }),
+      );
       if (!response.Body) {
         throw new Error(`S3 object has no body: ${key}`);
       }
@@ -46,7 +56,9 @@ export function createS3Storage(config: S3Config): StorageBackend {
     },
 
     async delete(key: string): Promise<void> {
-      await client.send(new DeleteObjectCommand({ Bucket: config.bucket, Key: key }));
+      await client.send(
+        new DeleteObjectCommand({ Bucket: config.bucket, Key: key }),
+      );
     },
   };
 }

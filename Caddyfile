@@ -1,0 +1,20 @@
+albbas.mateakos.com {
+	tls /certs/albbas.mateakos.com.pem /certs/albbas.mateakos.com.key
+	handle /api/* {
+		reverse_proxy api:3001
+	}
+	handle /health {
+		reverse_proxy api:3001
+	}
+	reverse_proxy web:3000
+}
+
+*.mateakos.com {
+	tls /certs/wildcard.mateakos.com.pem /certs/wildcard.mateakos.com.key
+	reverse_proxy api:3001
+}
+
+*.bufet.lol {
+	tls /certs/wildcard.bufet.lol.pem /certs/wildcard.bufet.lol.key
+	reverse_proxy api:3001
+}

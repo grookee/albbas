@@ -1,4 +1,4 @@
-import { getRedis } from './redis.js';
+import { getRedis } from "./redis.js";
 
 export interface UploadCacheEntry {
   s3Key: string;
@@ -13,7 +13,9 @@ function cacheKey(slug: string): string {
   return `upload:${slug}`;
 }
 
-export async function getUploadCache(slug: string): Promise<UploadCacheEntry | null> {
+export async function getUploadCache(
+  slug: string,
+): Promise<UploadCacheEntry | null> {
   const redis = await getRedis();
   if (!redis) return null;
   try {
@@ -24,11 +26,19 @@ export async function getUploadCache(slug: string): Promise<UploadCacheEntry | n
   }
 }
 
-export async function setUploadCache(slug: string, entry: UploadCacheEntry): Promise<void> {
+export async function setUploadCache(
+  slug: string,
+  entry: UploadCacheEntry,
+): Promise<void> {
   const redis = await getRedis();
   if (!redis) return;
   try {
-    await redis.set(cacheKey(slug), JSON.stringify(entry), 'EX', CACHE_TTL_SECONDS);
+    await redis.set(
+      cacheKey(slug),
+      JSON.stringify(entry),
+      "EX",
+      CACHE_TTL_SECONDS,
+    );
   } catch {
     // Redis is optional; ignore cache write failures.
   }
