@@ -54,6 +54,6 @@ export const createApiKeySchema = z.object({
 export type CreateApiKeyInput = z.infer<typeof createApiKeySchema>;
 
 export const createInviteSchema = z.object({
-  expiresAt: z.date().nullish(),
+  expiresAt: z.string().datetime().nullish(),
 });
 export type CreateInviteInput = z.infer<typeof createInviteSchema>;

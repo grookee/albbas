@@ -1,0 +1,28 @@
+{
+  "name": "@albbas/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev --port 5173",
+    "build": "svelte-kit sync && vite build",
+    "preview": "vite preview",
+    "typecheck": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "lint": "svelte-kit sync && eslint ."
+  },
+  "dependencies": {
+    "@albbas/shared": "workspace:*",
+    "@trpc/client": "^11.18.0"
+  },
+  "devDependencies": {
+    "@albbas/api": "workspace:*",
+    "@sveltejs/adapter-node": "^5.5.7",
+    "@sveltejs/kit": "^2.70.2",
+    "@sveltejs/vite-plugin-svelte": "^7.2.0",
+    "@types/node": "^22.10.7",
+    "svelte": "^5.56.8",
+    "svelte-check": "^4.7.4",
+    "typescript": "^5.7.3",
+    "vite": "^8.2.0"
+  }
+}

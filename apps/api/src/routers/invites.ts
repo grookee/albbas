@@ -22,7 +22,7 @@ export const invitesRouter = router({
       data: {
         code,
         createdById: ctx.user.id,
-        expiresAt: input.expiresAt ?? null,
+        expiresAt: input.expiresAt ? new Date(input.expiresAt) : null,
       },
       select: { id: true, code: true, expiresAt: true, createdAt: true },
     });

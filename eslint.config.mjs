@@ -3,19 +3,21 @@ import tseslint from 'typescript-eslint';
 import svelte from 'eslint-plugin-svelte';
 import globals from 'globals';
 
+const tsFiles = ['**/*.ts', '**/*.tsx', '**/*.mts', '**/*.cts'];
+
 export default tseslint.config(
   {
     ignores: ['**/dist/**', '**/build/**', '**/.svelte-kit/**', '**/node_modules/**'],
   },
   eslint.configs.recommended,
-  ...tseslint.configs.recommendedTypeChecked,
+  ...tseslint.configs.recommended.map((config) => ({
+    ...config,
+    files: config.files ?? tsFiles,
+  })),
   {
+    files: tsFiles,
     languageOptions: {
       globals: { ...globals.node, ...globals.es2022 },
-      parserOptions: {
-        project: ['./tsconfig.json', './apps/*/tsconfig.json', './packages/*/tsconfig.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
     },
     rules: {
       '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
@@ -38,6 +40,12 @@ export default tseslint.config(
     files: ['**/*.test.ts'],
     languageOptions: {
       globals: { ...globals.vitest },
+    },
+  },
+  {
+    files: ['apps/web/**/*.ts', 'apps/web/**/*.js', 'apps/web/**/*.svelte'],
+    languageOptions: {
+      globals: { ...globals.browser },
     },
   },
 );
