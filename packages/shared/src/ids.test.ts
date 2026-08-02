@@ -1,9 +1,9 @@
-import { describe, expect, it } from "vitest";
-import { API_KEY_PREFIX, SLUG_ALPHABET, SLUG_LENGTH } from "./constants.js";
-import { generateApiKey, generateInviteCode, generateSlug } from "./ids.js";
+import { describe, expect, it } from 'vitest';
+import { API_KEY_PREFIX, SLUG_ALPHABET, SLUG_LENGTH } from './constants.js';
+import { generateApiKey, generateInviteCode, generateSlug } from './ids.js';
 
-describe("generateSlug", () => {
-  it("produces unique slugs of the expected length", () => {
+describe('generateSlug', () => {
+  it('produces unique slugs of the expected length', () => {
     const slugs = new Set(Array.from({ length: 1000 }, () => generateSlug()));
     expect(slugs.size).toBe(1000);
     for (const slug of slugs) {
@@ -13,17 +13,22 @@ describe("generateSlug", () => {
       }
     }
   });
+
+  it('honors a custom length', () => {
+    expect(generateSlug(6)).toHaveLength(6);
+    expect(generateSlug(8)).toHaveLength(8);
+  });
 });
 
-describe("generateInviteCode", () => {
-  it("formats as UPPER groups separated by dashes", () => {
+describe('generateInviteCode', () => {
+  it('formats as UPPER groups separated by dashes', () => {
     const code = generateInviteCode();
     expect(code).toMatch(/^[A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4}$/);
   });
 });
 
-describe("generateApiKey", () => {
-  it("prepends the live prefix and keeps a stable display prefix", () => {
+describe('generateApiKey', () => {
+  it('prepends the live prefix and keeps a stable display prefix', () => {
     const { raw, prefix, full } = generateApiKey();
     expect(full).toBe(`${API_KEY_PREFIX}${raw}`);
     expect(full.startsWith(API_KEY_PREFIX)).toBe(true);

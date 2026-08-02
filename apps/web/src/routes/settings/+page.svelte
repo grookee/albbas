@@ -106,7 +106,11 @@
   }
 
   async function revokeKey(id: string): Promise<void> {
-    if (!(await confirm('Revoke this API key? Uploaders using it will stop working.', { confirmLabel: 'revoke' })))
+    if (
+      !(await confirm('Revoke this API key? Uploaders using it will stop working.', {
+        confirmLabel: 'revoke',
+      }))
+    )
       return;
     try {
       await trpc.keys.revoke.mutate({ id });
@@ -122,12 +126,13 @@
     return JSON.stringify(
       {
         Name: 'albbas',
-        DestinationType: 'ImageUploader, TextUploader, FileUploader',
+        DestinationType: 'ImageUploader, TextUploader, FileUploader, URLShortener',
         RequestMethod: 'POST',
         RequestURL: `${origin}/api/upload`,
         Body: 'MultipartFormData',
         FileFormName: 'file',
         Headers: { 'X-Api-Key': key },
+        Arguments: { url: '{input}' },
         URL: '{response:url}',
         DeletionURL: '{response:deleteUrl}',
         ErrorMessage: '{response:error}',
@@ -227,7 +232,9 @@
   <section class="card">
     <h2>share domain</h2>
     {#if !auth.user.domain}
-      <p class="error">you haven't picked a share domain yet — uploads are disabled until you do.</p>
+      <p class="error">
+        you haven't picked a share domain yet — uploads are disabled until you do.
+      </p>
     {/if}
     <div class="form-row">
       <div class="field">
@@ -266,7 +273,9 @@
 
   <section class="card">
     <h2>api keys</h2>
-    <p class="muted-note">keys are used by uploader clients (ShareX, uPic). pick one and download its config below.</p>
+    <p class="muted-note">
+      keys are used by uploader clients (ShareX, uPic). pick one and download its config below.
+    </p>
     <div class="form-row" style="margin-bottom: 1rem">
       <div style="flex: 1">
         <Field name="key-name" label="name" placeholder="work mac" bind:value={keyName} />
@@ -332,15 +341,15 @@
 
       <h3 style="margin-bottom: 0.25rem">sharex</h3>
       <p class="muted-note">
-        windows only. download the file or copy the config into ShareX →
-        destinations → custom uploader.
+        windows only. download the file or copy the config into ShareX → destinations → custom
+        uploader. one config handles images, files, text (pasted with syntax highlighting), and
+        shortened urls.
       </p>
       <CodeBlock text={sxcuConfig(activeKey.key)} />
       <a
         class="btn btn-secondary btn-sm"
         href={`/api/uploaders/sharex.sxcu?api_key=${activeKey.key}`}
-        rel="external"
-        >download albbas.sxcu</a
+        rel="external">download albbas.sxcu</a
       >
 
       <hr />

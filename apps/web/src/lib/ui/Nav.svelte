@@ -26,6 +26,8 @@
     </a>
     <nav>
       {#if auth.ready && auth.user}
+        <a href={resolve('/paste')}>paste</a>
+        <a href={resolve('/shorten')}>shorten</a>
         <a href={resolve('/gallery')}>gallery</a>
         <a href={resolve('/settings')}>settings</a>
         <button class="btn-link" onclick={onLogout} disabled={loggingOut}>logout</button>
