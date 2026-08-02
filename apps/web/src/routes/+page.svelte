@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { resolve } from '$app/paths';
   import { auth } from '$lib/auth.svelte';
   import { trpc, errorMessage } from '$lib/trpc';
   import { formatBytes, formatDate } from '$lib/format';
@@ -104,8 +105,8 @@
     </p>
     <p class="muted">no tracking, no accounts for visitors, nothing public.</p>
     <div class="actions">
-      <a class="btn btn-primary" href="/login">login</a>
-      <a class="btn btn-secondary" href="/register">register</a>
+      <a class="btn btn-primary" href={resolve('/login')}>login</a>
+      <a class="btn btn-secondary" href={resolve('/register')}>register</a>
     </div>
   </section>
 {:else}
@@ -146,7 +147,7 @@
       <div class="upload-result">
         <p class="muted" style="margin-top:0">uploaded:</p>
         <div class="url-cell">
-          <a href={lastUrl} target="_blank" rel="noreferrer">{lastUrl}</a>
+          <a href={lastUrl} target="_blank" rel="external noreferrer">{lastUrl}</a>
           <button class="copy-btn-inline" onclick={() => copyText(lastUrl ?? '')}>copy</button>
         </div>
       </div>
@@ -176,7 +177,7 @@
             <tr>
               <td>
                 <div class="url-cell">
-                  <a href={upload.url} target="_blank" rel="noreferrer"
+                  <a href={upload.url} target="_blank" rel="external noreferrer"
                     >{upload.originalName}</a
                   >
                   <button

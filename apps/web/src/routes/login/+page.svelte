@@ -1,5 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import { resolve } from '$app/paths';
   import { auth } from '$lib/auth.svelte';
   import { trpc, errorMessage } from '$lib/trpc';
   import Button from '$lib/ui/Button.svelte';
@@ -11,7 +12,7 @@
   let busy = $state(false);
 
   $effect(() => {
-    if (auth.ready && auth.user) void goto('/', { replaceState: true });
+    if (auth.ready && auth.user) void goto(resolve('/'), { replaceState: true });
   });
 
   async function onSubmit(e: SubmitEvent): Promise<void> {
@@ -21,7 +22,7 @@
     try {
       await trpc.auth.login.mutate({ email, password });
       auth.user = await trpc.auth.me.query();
-      await goto('/');
+      await goto(resolve('/'));
     } catch (err) {
       error = errorMessage(err);
     } finally {
@@ -60,5 +61,5 @@
       {busy ? 'signing in…' : 'sign in'}
     </Button>
   </form>
-  <p class="foot muted">no account? <a href="/register">register</a></p>
+  <p class="foot muted">no account? <a href={resolve('/register')}>register</a></p>
 </div>

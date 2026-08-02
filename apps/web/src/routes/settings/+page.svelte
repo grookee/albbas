@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { resolve } from '$app/paths';
   import { auth } from '$lib/auth.svelte';
   import { trpc, errorMessage } from '$lib/trpc';
   import { formatDate } from '$lib/format';
@@ -201,7 +202,7 @@
 {#if !auth.ready}
   <div class="muted">loading…</div>
 {:else if !auth.user}
-  <p>please <a href="/login">log in</a>.</p>
+  <p>please <a href={resolve('/login')}>log in</a>.</p>
 {:else}
   <section class="card">
     <h2>share domain</h2>
@@ -301,7 +302,10 @@
         destinations → custom uploader.
       </p>
       <CodeBlock text={sxcuConfig(freshKey.key)} />
-      <a class="btn btn-secondary btn-sm" href={`/api/uploaders/sharex.sxcu?api_key=${freshKey.key}`}
+      <a
+        class="btn btn-secondary btn-sm"
+        href={`/api/uploaders/sharex.sxcu?api_key=${freshKey.key}`}
+        rel="external"
         >download albbas.sxcu</a
       >
 
