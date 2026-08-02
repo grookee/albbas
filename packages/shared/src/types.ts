@@ -17,6 +17,7 @@ export interface UploadUrlResponse {
 }
 
 export interface SxcuConfig {
+  Version: string;
   Name: string;
   DestinationType: string;
   RequestMethod: string;

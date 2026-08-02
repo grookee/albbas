@@ -30,6 +30,7 @@ async function buildSxcu(
   }
 
   const config: SxcuConfig = {
+    Version: "17.0.0",
     Name: "albbas",
     DestinationType: "ImageUploader, TextUploader, FileUploader",
     RequestMethod: "POST",
