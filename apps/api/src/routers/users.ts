@@ -12,7 +12,7 @@ export const usersRouter = router({
         where: { id: ctx.user.id },
         data: {
           domain: toDbDomain(input.domain),
-          subdomain: input.subdomain ?? null,
+          subdomain: input.subdomain,
         },
       });
       return toPublicUser(user);

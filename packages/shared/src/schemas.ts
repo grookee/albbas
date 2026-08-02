@@ -37,17 +37,14 @@ export const domainSelectionSchema = z.object({
     .string()
     .trim()
     .toLowerCase()
+    .min(1)
     .max(63)
-    .regex(SUBDOMAIN_PATTERN, "Invalid subdomain")
-    .optional(),
+    .regex(SUBDOMAIN_PATTERN, "Invalid subdomain"),
 });
 export type DomainSelection = z.infer<typeof domainSelectionSchema>;
 
 export function baseUrlFor(selection: DomainSelection): string {
-  const host = selection.subdomain
-    ? `${selection.subdomain}.${selection.domain}`
-    : selection.domain;
-  return `https://${host}`;
+  return `https://${selection.subdomain}.${selection.domain}`;
 }
 
 export const createApiKeySchema = z.object({

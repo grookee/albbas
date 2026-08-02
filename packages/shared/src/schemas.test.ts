@@ -10,9 +10,17 @@ describe("domainSelectionSchema", () => {
     expect(result.success).toBe(true);
   });
 
-  it("accepts a bare domain when no subdomain is given", () => {
+  it("rejects a bare domain when no subdomain is given", () => {
     const result = domainSelectionSchema.safeParse({ domain: "bufet.lol" });
-    expect(result.success).toBe(true);
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects an empty subdomain", () => {
+    const result = domainSelectionSchema.safeParse({
+      domain: "mateakos.com",
+      subdomain: " ",
+    });
+    expect(result.success).toBe(false);
   });
 
   it("rejects disallowed domains", () => {
@@ -39,9 +47,5 @@ describe("baseUrlFor", () => {
     expect(baseUrlFor({ domain: "mateakos.com", subdomain: "i" })).toBe(
       "https://i.mateakos.com",
     );
-  });
-
-  it("builds an apex URL when no subdomain is set", () => {
-    expect(baseUrlFor({ domain: "bufet.lol" })).toBe("https://bufet.lol");
   });
 });

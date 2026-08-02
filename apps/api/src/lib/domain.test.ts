@@ -27,9 +27,7 @@ describe("baseUrlForUser", () => {
     );
   });
 
-  it("builds an apex URL without a subdomain", () => {
-    expect(baseUrlForUser({ domain: "BUFET_LOL", subdomain: null })).toBe(
-      "https://bufet.lol",
-    );
+  it("returns null when no subdomain is configured", () => {
+    expect(baseUrlForUser({ domain: "BUFET_LOL", subdomain: null })).toBeNull();
   });
 });

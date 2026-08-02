@@ -33,8 +33,10 @@
     if (auth.user.role === 'ADMIN') void loadInvites();
   });
 
-  function baseUrlPreview(): string {
-    return baseUrlFor({ domain, subdomain: subdomain.trim() || undefined });
+  function baseUrlPreview(): string | null {
+    const trimmed = subdomain.trim();
+    if (!trimmed) return null;
+    return baseUrlFor({ domain, subdomain: trimmed });
   }
 
   async function saveSettings(): Promise<void> {
@@ -44,7 +46,7 @@
     try {
       auth.user = await trpc.users.updateSettings.mutate({
         domain,
-        subdomain: subdomain.trim() || undefined,
+        subdomain: subdomain.trim(),
       });
       settingsMsg = 'saved — your share links use the new address.';
     } catch (err) {
@@ -230,7 +232,7 @@
     <div class="form-row">
       <div class="field">
         <label for="subdomain">subdomain</label>
-        <input id="subdomain" name="subdomain" bind:value={subdomain} placeholder="i" />
+        <input id="subdomain" name="subdomain" bind:value={subdomain} placeholder="i" required />
       </div>
       <div class="field">
         <label for="domain">domain</label>
@@ -242,7 +244,12 @@
       </div>
     </div>
     <p class="muted-note">
-      your links will look like <span style="color: var(--fg1)">{baseUrlPreview()}/abc123456</span>
+      {#if baseUrlPreview()}
+        your links will look like
+        <span style="color: var(--fg1)">{baseUrlPreview()}/abc123456</span>
+      {:else}
+        enter a subdomain to see your share link preview.
+      {/if}
     </p>
     {#if settingsError}
       <p class="error">{settingsError}</p>
@@ -251,7 +258,7 @@
       <p class="muted-note" style="color: var(--green-b)">{settingsMsg}</p>
     {/if}
     <div style="margin-top: 0.75rem">
-      <Button onclick={saveSettings} disabled={savingSettings}>
+      <Button onclick={saveSettings} disabled={savingSettings || !subdomain.trim()}>
         {savingSettings ? 'saving…' : 'save'}
       </Button>
     </div>

@@ -25,6 +25,6 @@ export function baseUrlForUser(user: {
   subdomain: string | null;
 }): string | null {
   const domain = toAllowedDomain(user.domain);
-  if (!domain) return null;
-  return baseUrlFor({ domain, subdomain: user.subdomain ?? undefined });
+  if (!domain || !user.subdomain) return null;
+  return baseUrlFor({ domain, subdomain: user.subdomain });
 }
