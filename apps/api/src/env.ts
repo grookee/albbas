@@ -26,7 +26,7 @@ const envSchema = z.object({
     .string()
     .optional()
     .transform((v) => v === "true")
-    .default("true"),
+    .default(true),
   LOCAL_STORAGE_DIR: z.string().default("./data/uploads"),
 
   MAX_UPLOAD_BYTES: z.coerce
