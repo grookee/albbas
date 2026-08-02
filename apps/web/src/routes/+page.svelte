@@ -3,6 +3,8 @@
   import { auth } from '$lib/auth.svelte';
   import { trpc, errorMessage } from '$lib/trpc';
   import { formatBytes, formatDate } from '$lib/format';
+  import { confirm } from '$lib/confirm.svelte';
+  import CopyButton from '$lib/ui/CopyButton.svelte';
 
   let fileInput = $state<HTMLInputElement | undefined>(undefined);
   let dragging = $state(false);
@@ -83,7 +85,7 @@
   }
 
   async function onDelete(upload: UploadItem): Promise<void> {
-    if (!confirm(`Delete "${upload.originalName}"?`)) return;
+    if (!(await confirm(`Delete "${upload.originalName}"?`, { confirmLabel: 'delete' }))) return;
     try {
       await trpc.uploads.delete.mutate({ slug: upload.slug });
       if (lastUrl === upload.url) lastUrl = null;
@@ -92,10 +94,6 @@
     } catch (err) {
       uploadsError = errorMessage(err);
     }
-  }
-
-  async function copyText(text: string): Promise<void> {
-    await navigator.clipboard.writeText(text);
   }
 </script>
 
@@ -157,7 +155,7 @@
         <p class="muted" style="margin-top:0">uploaded:</p>
         <div class="url-cell">
           <a href={lastUrl} target="_blank" rel="external noreferrer">{lastUrl}</a>
-          <button class="copy-btn-inline" onclick={() => copyText(lastUrl ?? '')}>copy</button>
+          <CopyButton text={lastUrl} />
         </div>
       </div>
     {/if}
@@ -205,10 +203,7 @@
                   <a href={upload.url} target="_blank" rel="external noreferrer"
                     >{upload.originalName}</a
                   >
-                  <button
-                    class="copy-btn-inline"
-                    onclick={() => copyText(upload.url)}>copy</button
-                  >
+                  <CopyButton text={upload.url} />
                 </div>
               </td>
               <td class="muted">{formatBytes(upload.sizeBytes)}</td>

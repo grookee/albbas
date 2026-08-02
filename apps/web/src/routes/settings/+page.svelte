@@ -4,6 +4,7 @@
   import { auth } from '$lib/auth.svelte';
   import { trpc, errorMessage } from '$lib/trpc';
   import { formatDate } from '$lib/format';
+  import { confirm } from '$lib/confirm.svelte';
   import { ALLOWED_DOMAINS, baseUrlFor, type AllowedDomain } from '@albbas/shared';
   import Button from '$lib/ui/Button.svelte';
   import Badge from '$lib/ui/Badge.svelte';
@@ -103,7 +104,8 @@
   }
 
   async function revokeKey(id: string): Promise<void> {
-    if (!confirm('Revoke this API key? Uploaders using it will stop working.')) return;
+    if (!(await confirm('Revoke this API key? Uploaders using it will stop working.', { confirmLabel: 'revoke' })))
+      return;
     try {
       await trpc.keys.revoke.mutate({ id });
       if (activeKey?.id === id) activeKey = null;
@@ -188,7 +190,7 @@
   }
 
   async function revokeInvite(id: string): Promise<void> {
-    if (!confirm('Revoke this invite code?')) return;
+    if (!(await confirm('Revoke this invite code?', { confirmLabel: 'revoke' }))) return;
     try {
       await trpc.invites.revoke.mutate({ id });
       await loadInvites();

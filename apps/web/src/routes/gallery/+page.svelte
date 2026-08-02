@@ -3,7 +3,9 @@
   import { auth } from '$lib/auth.svelte';
   import { trpc, errorMessage } from '$lib/trpc';
   import { formatBytes, formatDate } from '$lib/format';
+  import { confirm } from '$lib/confirm.svelte';
   import FileIcon from '$lib/ui/FileIcon.svelte';
+  import CopyButton from '$lib/ui/CopyButton.svelte';
 
   type UploadItem = {
     id: string;
@@ -91,16 +93,8 @@
     return mime.startsWith('video/');
   }
 
-  function isAudio(mime: string): boolean {
-    return mime.startsWith('audio/');
-  }
-
-  async function copyText(text: string): Promise<void> {
-    await navigator.clipboard.writeText(text);
-  }
-
   async function onDelete(upload: UploadItem): Promise<void> {
-    if (!confirm(`Delete "${upload.originalName}"?`)) return;
+    if (!(await confirm(`Delete "${upload.originalName}"?`, { confirmLabel: 'delete' }))) return;
     deletingId = upload.id;
     error = null;
     try {
@@ -162,13 +156,6 @@
                   preload="metadata"
                   onerror={() => markFailed(upload.id)}
                 ></video>
-              {:else if isAudio(upload.mimeType) && !failed[upload.id]}
-                <audio
-                  src={upload.url}
-                  controls
-                  preload="metadata"
-                  onerror={() => markFailed(upload.id)}
-                ></audio>
               {:else}
                 <div class="gallery-placeholder">
                   <FileIcon mime={upload.mimeType} />
@@ -184,7 +171,7 @@
                 {formatBytes(upload.sizeBytes)} · {formatDate(upload.createdAt)}
               </span>
               <div class="gallery-actions">
-                <button class="copy-btn-inline" onclick={() => copyText(upload.url)}>copy</button>
+                <CopyButton text={upload.url} />
                 <a class="btn btn-secondary btn-sm" href={upload.url} target="_blank" rel="external noreferrer"
                   >open</a
                 >

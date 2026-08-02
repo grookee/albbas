@@ -562,11 +562,6 @@ main.container {
   object-fit: cover;
 }
 
-.gallery-thumb audio {
-  width: 100%;
-  padding: 0 0.75rem;
-}
-
 .gallery-placeholder {
   display: flex;
   flex-direction: column;
