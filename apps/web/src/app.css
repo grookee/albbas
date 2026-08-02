@@ -499,3 +499,214 @@ main.container {
   font-size: 0.8rem;
   color: var(--gray);
 }
+
+/* ---- card heads ---- */
+
+.card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--bg2);
+  padding-bottom: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.card-head h2 {
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
+/* ---- gallery ---- */
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.gallery-item {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg1);
+  border: 1px solid var(--bg2);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease;
+}
+
+.gallery-item:hover {
+  border-color: var(--bg3);
+}
+
+.gallery-thumb {
+  position: relative;
+  display: block;
+  aspect-ratio: 1 / 1;
+  background: var(--bg1);
+  overflow: hidden;
+}
+
+.gallery-thumb:hover {
+  text-decoration: none;
+}
+
+.gallery-thumb img,
+.gallery-thumb video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gallery-thumb audio {
+  width: 100%;
+  padding: 0 0.75rem;
+}
+
+.gallery-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  width: 100%;
+  height: 100%;
+  color: var(--gray);
+}
+
+.gallery-placeholder .ext {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--fg2);
+}
+
+.gallery-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.6rem 0.7rem;
+  border-top: 1px solid var(--bg2);
+  min-height: 6.25rem;
+}
+
+.gallery-name {
+  font-size: 0.85rem;
+  color: var(--fg1);
+  word-break: break-all;
+  line-height: 1.3;
+}
+
+.gallery-name:hover {
+  color: var(--fg0);
+  text-decoration: none;
+}
+
+.gallery-sub {
+  font-size: 0.72rem;
+  color: var(--gray);
+  word-break: break-all;
+}
+
+.gallery-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: auto;
+  padding-top: 0.35rem;
+  flex-wrap: wrap;
+}
+
+/* ---- pagination ---- */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.pagination .page-btn {
+  min-width: 2.1rem;
+  text-align: center;
+}
+
+.pagination .page-current {
+  background: var(--orange);
+  color: var(--bg0);
+  border-color: var(--orange);
+}
+
+.pagination .page-current:hover:not(:disabled) {
+  background: var(--orange-b);
+  color: var(--bg0);
+}
+
+.pagination .page-gap {
+  padding: 0.3rem 0.2rem;
+  color: var(--gray);
+}
+
+/* ---- skeletons ---- */
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--bg2);
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, var(--bg3), transparent);
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton-block {
+  aspect-ratio: 1 / 1;
+  border-radius: 0;
+}
+
+.skeleton-line {
+  height: 0.8rem;
+  border-radius: var(--radius);
+}
+
+.table-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.table-skeleton-row {
+  display: grid;
+  grid-template-columns: 3fr 1fr 1.5fr 1fr;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+/* ---- file icons ---- */
+
+.file-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  fill: none;
+  stroke: var(--gray);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

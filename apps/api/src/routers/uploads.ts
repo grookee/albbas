@@ -11,6 +11,33 @@ const uploadListSchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(50),
 });
 
+const uploadGallerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(24),
+});
+
+type UploadRecord = {
+  id: string;
+  slug: string;
+  originalName: string;
+  mimeType: string;
+  sizeBytes: number;
+  baseUrl: string;
+  createdAt: Date;
+};
+
+function toItem(upload: UploadRecord) {
+  return {
+    id: upload.id,
+    slug: upload.slug,
+    originalName: upload.originalName,
+    mimeType: upload.mimeType,
+    sizeBytes: upload.sizeBytes,
+    url: `${upload.baseUrl}/${upload.slug}${extensionForMimeType(upload.mimeType)}`,
+    createdAt: upload.createdAt.toISOString(),
+  };
+}
+
 export const uploadsRouter = router({
   list: protectedProcedure
     .input(uploadListSchema)
@@ -27,19 +54,34 @@ export const uploadsRouter = router({
       });
 
       return {
-        items: uploads.map((upload) => ({
-          id: upload.id,
-          slug: upload.slug,
-          originalName: upload.originalName,
-          mimeType: upload.mimeType,
-          sizeBytes: upload.sizeBytes,
-          url: `${upload.baseUrl}/${upload.slug}${extensionForMimeType(upload.mimeType)}`,
-          createdAt: upload.createdAt.toISOString(),
-        })),
+        items: uploads.map(toItem),
         nextCursor:
           uploads.length === input.limit
             ? (uploads.at(-1)?.createdAt.toISOString() ?? null)
             : null,
+      };
+    }),
+
+  gallery: protectedProcedure
+    .input(uploadGallerySchema)
+    .query(async ({ ctx, input }) => {
+      const where = { userId: ctx.user.id };
+      const [uploads, total] = await Promise.all([
+        prisma.upload.findMany({
+          where,
+          orderBy: { createdAt: "desc" },
+          skip: (input.page - 1) * input.limit,
+          take: input.limit,
+        }),
+        prisma.upload.count({ where }),
+      ]);
+
+      return {
+        items: uploads.map(toItem),
+        page: input.page,
+        limit: input.limit,
+        total,
+        totalPages: Math.max(1, Math.ceil(total / input.limit)),
       };
     }),
 

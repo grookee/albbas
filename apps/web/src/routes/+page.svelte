@@ -21,19 +21,28 @@
     createdAt: string;
   };
   let uploads = $state<UploadItem[]>([]);
-  let loaded = $state(false);
+  let uploadsStarted = $state(false);
+  let uploadsLoading = $state(false);
+  let uploadsError = $state<string | null>(null);
+  const skeletonRows = Array.from({ length: 5 }, (_, i) => i);
 
-  async function refresh(): Promise<void> {
-    const res = await trpc.uploads.list.query({ limit: 50 });
-    uploads = res.items;
+  async function loadUploads(): Promise<void> {
+    uploadsLoading = true;
+    uploadsError = null;
+    try {
+      const res = await trpc.uploads.list.query({ limit: 5 });
+      uploads = res.items;
+    } catch (err) {
+      uploadsError = errorMessage(err);
+    } finally {
+      uploadsLoading = false;
+    }
   }
 
   $effect(() => {
-    if (auth.ready && auth.user && !loaded) {
-      loaded = true;
-      void refresh().catch((err: unknown) => {
-        uploadError = errorMessage(err);
-      });
+    if (auth.ready && auth.user && !uploadsStarted) {
+      uploadsStarted = true;
+      void loadUploads();
     }
   });
 
@@ -53,7 +62,7 @@
         throw new Error(body?.error ?? `Upload failed (HTTP ${res.status})`);
       }
       lastUrl = body?.url ?? null;
-      await refresh();
+      await loadUploads();
     } catch (err) {
       uploadError = errorMessage(err);
     } finally {
@@ -79,9 +88,9 @@
       await trpc.uploads.delete.mutate({ slug: upload.slug });
       if (lastUrl === upload.url) lastUrl = null;
       lastDeleted = upload.url;
-      await refresh();
+      await loadUploads();
     } catch (err) {
-      uploadError = errorMessage(err);
+      uploadsError = errorMessage(err);
     }
   }
 
@@ -159,8 +168,24 @@
   </section>
 
   <section class="card">
-    <h2>recent uploads</h2>
-    {#if uploads.length === 0}
+    <div class="card-head">
+      <h2>recent uploads</h2>
+      <a class="btn-link" href={resolve('/gallery')}>view all →</a>
+    </div>
+    {#if uploadsLoading}
+      <div class="table-skeleton" aria-hidden="true">
+        {#each skeletonRows as i (i)}
+          <div class="table-skeleton-row">
+            <div class="skeleton skeleton-line" style="width: 70%"></div>
+            <div class="skeleton skeleton-line" style="width: 40%"></div>
+            <div class="skeleton skeleton-line" style="width: 60%"></div>
+            <div class="skeleton skeleton-line" style="width: 50%"></div>
+          </div>
+        {/each}
+      </div>
+    {:else if uploadsError}
+      <p class="error">{uploadsError}</p>
+    {:else if uploads.length === 0}
       <p class="muted">nothing here yet.</p>
     {:else}
       <table class="table">
