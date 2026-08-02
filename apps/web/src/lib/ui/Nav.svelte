@@ -15,7 +15,15 @@
 
 <header class="nav">
   <div class="container nav-inner">
-    <a class="brand" href={resolve('/')}>albbas</a>
+    <a class="brand" href={resolve('/')}>
+      <svg class="logo" viewBox="0 0 5 5" aria-hidden="true">
+        <rect x="0" y="0" width="5" height="1" />
+        <rect x="0" y="0" width="1" height="5" />
+        <rect x="2" y="2" width="1" height="1" />
+        <rect x="2" y="4" width="3" height="1" />
+      </svg>
+      <span>albbas</span>
+    </a>
     <nav>
       {#if auth.ready && auth.user}
         <a href={resolve('/settings')}>settings</a>
@@ -27,3 +35,16 @@
     </nav>
   </div>
 </header>
+
+<style>
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .logo {
+    width: 1.25rem;
+    height: 1.25rem;
+    fill: var(--orange-b);
+  }
+</style>
