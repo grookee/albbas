@@ -15,6 +15,10 @@ const envSchema = z.object({
     .min(32)
     .default("dev-secret-do-not-use-in-production-0123456789"),
   SESSION_TTL_DAYS: z.coerce.number().int().positive().default(30),
+  ENCRYPTION_KEY: z
+    .string()
+    .min(32)
+    .default("dev-encryption-key-do-not-use-in-production-0123456789abcdef"),
 
   STORAGE_BACKEND: z.enum(["s3", "local"]).default("s3"),
   S3_ENDPOINT: z.string().default("https://supabase.co"),

@@ -50,6 +50,7 @@ model ApiKey {
   name       String
   prefix     String
   keyHash    String    @unique
+  keyEnc     String?
   userId     String
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   lastUsedAt DateTime?

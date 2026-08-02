@@ -65,7 +65,10 @@
   let keyName = $state('');
   let creatingKey = $state(false);
   let keysError = $state<string | null>(null);
-  let freshKey: { id: string; name: string; key: string } | null = $state(null);
+  let activeKey: { id: string; name: string; key: string } | null = $state(null);
+  let activeKeyIsNew = $state(false);
+  let revealingId = $state<string | null>(null);
+  let configError = $state<string | null>(null);
 
   async function loadKeys(): Promise<void> {
     keys = await trpc.keys.list.query();
@@ -76,7 +79,9 @@
     keysError = null;
     try {
       const created = await trpc.keys.create.mutate({ name: keyName });
-      freshKey = { id: created.id, name: created.name, key: created.key };
+      activeKey = { id: created.id, name: created.name, key: created.key };
+      activeKeyIsNew = true;
+      configError = null;
       keyName = '';
       await loadKeys();
     } catch (err) {
@@ -86,11 +91,25 @@
     }
   }
 
+  async function showConfig(key: ApiKeyRow): Promise<void> {
+    revealingId = key.id;
+    configError = null;
+    try {
+      const revealed = await trpc.keys.reveal.query({ id: key.id });
+      activeKey = { id: revealed.id, name: revealed.name, key: revealed.key };
+      activeKeyIsNew = false;
+    } catch (err) {
+      configError = errorMessage(err);
+    } finally {
+      revealingId = null;
+    }
+  }
+
   async function revokeKey(id: string): Promise<void> {
     if (!confirm('Revoke this API key? Uploaders using it will stop working.')) return;
     try {
       await trpc.keys.revoke.mutate({ id });
-      if (freshKey?.id === id) freshKey = null;
+      if (activeKey?.id === id) activeKey = null;
       await loadKeys();
     } catch (err) {
       keysError = errorMessage(err);
@@ -241,7 +260,7 @@
 
   <section class="card">
     <h2>api keys</h2>
-    <p class="muted-note">keys are used by uploader clients (ShareX, uPic). the full key is shown only once, when created.</p>
+    <p class="muted-note">keys are used by uploader clients (ShareX, uPic). the full key is shown only once when created, but you can re-download its config anytime.</p>
     <div class="form-row" style="margin-bottom: 1rem">
       <div style="flex: 1">
         <Field name="key-name" label="name" placeholder="work mac" bind:value={keyName} />
@@ -252,6 +271,9 @@
     </div>
     {#if keysError}
       <p class="error">{keysError}</p>
+    {/if}
+    {#if configError}
+      <p class="error">{configError}</p>
     {/if}
     {#if keys.length === 0}
       <p class="muted">no keys yet.</p>
@@ -272,6 +294,13 @@
               <td class="muted">{key.prefix}…</td>
               <td class="muted">{key.lastUsedAt ? formatDate(key.lastUsedAt) : 'never'}</td>
               <td class="actions">
+                <button
+                  class="btn btn-secondary btn-sm"
+                  onclick={() => showConfig(key)}
+                  disabled={revealingId === key.id}
+                >
+                  {revealingId === key.id ? 'loading…' : 'config'}
+                </button>
                 <button class="btn btn-danger btn-sm" onclick={() => revokeKey(key.id)}
                   >revoke</button
                 >
@@ -285,26 +314,34 @@
 
   <section class="card">
     <h2>uploader config</h2>
-    {#if !freshKey}
+    {#if !activeKey}
       <p class="muted-note">
-        create a new api key above to generate a ready-made config for your uploader.
+        create a new api key or pick an existing one above to generate a ready-made config for your
+        uploader.
       </p>
     {:else if !origin}
       <div class="muted">loading…</div>
     {:else}
-      <p class="muted-note">
-        key <span style="color: var(--fg1)">{freshKey.name}</span> ({freshKey.key})
-      </p>
+      {#if activeKeyIsNew}
+        <p class="muted-note">
+          key <span style="color: var(--fg1)">{activeKey.name}</span> — save it now, the full key is
+          shown only once. you can re-download its config anytime.
+        </p>
+      {:else}
+        <p class="muted-note">
+          key <span style="color: var(--fg1)">{activeKey.name}</span>
+        </p>
+      {/if}
 
       <h3 style="margin-bottom: 0.25rem">sharex</h3>
       <p class="muted-note">
         windows only. download the file or copy the config into ShareX →
         destinations → custom uploader.
       </p>
-      <CodeBlock text={sxcuConfig(freshKey.key)} />
+      <CodeBlock text={sxcuConfig(activeKey.key)} />
       <a
         class="btn btn-secondary btn-sm"
-        href={`/api/uploaders/sharex.sxcu?api_key=${freshKey.key}`}
+        href={`/api/uploaders/sharex.sxcu?api_key=${activeKey.key}`}
         rel="external"
         >download albbas.sxcu</a
       >
@@ -316,7 +353,7 @@
         macos only. open uPic preferences → uploaders → add, pick "custom", and paste the JSON
         below.
       </p>
-      <CodeBlock text={upicConfig(freshKey.key)} />
+      <CodeBlock text={upicConfig(activeKey.key)} />
     {/if}
   </section>
 

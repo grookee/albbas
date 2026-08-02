@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { safeEqualHex, sha256Hex } from "./crypto.js";
+import {
+  decryptSecret,
+  encryptionKeyFromSecret,
+  encryptSecret,
+  safeEqualHex,
+  sha256Hex,
+} from "./crypto.js";
 
 describe("sha256Hex", () => {
   it("produces a stable 64-char hex digest", () => {
@@ -26,5 +32,37 @@ describe("safeEqualHex", () => {
 
   it("rejects empty input", () => {
     expect(safeEqualHex("", "")).toBe(false);
+  });
+});
+
+describe("encryptSecret / decryptSecret", () => {
+  const key = encryptionKeyFromSecret(
+    "test-encryption-key-0123456789-0123456789",
+  );
+
+  it("round-trips a secret", () => {
+    const encrypted = encryptSecret("albb_abc123", key);
+    expect(encrypted).not.toContain("albb_abc123");
+    expect(encrypted.startsWith("v1.")).toBe(true);
+    expect(decryptSecret(encrypted, key)).toBe("albb_abc123");
+  });
+
+  it("produces a different ciphertext each time", () => {
+    const a = encryptSecret("secret", key);
+    const b = encryptSecret("secret", key);
+    expect(a).not.toBe(b);
+  });
+
+  it("fails to decrypt with a different key", () => {
+    const encrypted = encryptSecret("secret", key);
+    const otherKey = encryptionKeyFromSecret(
+      "another-encryption-key-0123456789-0123456789",
+    );
+    expect(() => decryptSecret(encrypted, otherKey)).toThrow();
+  });
+
+  it("rejects malformed payloads", () => {
+    expect(() => decryptSecret("garbage", key)).toThrow();
+    expect(() => decryptSecret("v2.aa.bb.cc", key)).toThrow();
   });
 });
