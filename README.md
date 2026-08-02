@@ -57,15 +57,15 @@ an initial admin account on first boot.
 
 the main knobs live in `.env` (see `.env.example`):
 
-| variable               | purpose                                       |
-| ---------------------- | --------------------------------------------- |
-| `ORIGIN`               | public origin for the web app (SSR)           |
-| `SESSION_SECRET`       | signs session cookies (32+ chars)             |
-| `ENCRYPTION_KEY`       | encrypts api keys at rest (32+ chars)         |
-| `STORAGE_BACKEND`      | `s3` or `local`                    |
-| `S3_*`                 | S3-compatible endpoint, keys, bucket          |
-| `MAX_UPLOAD_BYTES`     | max upload size                               |
-| `UPLOAD_RATE_LIMIT_PER_HOUR` | uploads allowed per user per hour        |
+| variable                         | purpose                                |
+| -------------------------------- | -------------------------------------- |
+| `ORIGIN`                         | public origin for the web app (SSR)    |
+| `SESSION_SECRET`                 | signs session cookies (32+ chars)      |
+| `ENCRYPTION_KEY`                 | encrypts api keys at rest (32+ chars)  |
+| `STORAGE_BACKEND`                | `s3` or `local`                        |
+| `S3_*`                           | S3-compatible endpoint, keys, bucket   |
+| `MAX_UPLOAD_BYTES`               | max upload size                        |
+| `UPLOAD_RATE_LIMIT_PER_HOUR`     | uploads allowed per user per hour      |
 | `ADMIN_EMAIL` / `ADMIN_PASSWORD` | seeded admin account (first boot only) |
 
 ## project structure
@@ -83,14 +83,14 @@ docker-compose.yml
 
 ## scripts
 
-| command             | what it does                    |
-| ------------------- | ------------------------------- |
-| `pnpm dev`          | run everything in dev mode      |
-| `pnpm build`        | build all packages              |
-| `pnpm lint`         | lint all packages               |
-| `pnpm typecheck`    | typecheck all packages          |
-| `pnpm test`         | run tests                       |
-| `pnpm format`       | format with Prettier            |
+| command          | what it does               |
+| ---------------- | -------------------------- |
+| `pnpm dev`       | run everything in dev mode |
+| `pnpm build`     | build all packages         |
+| `pnpm lint`      | lint all packages          |
+| `pnpm typecheck` | typecheck all packages     |
+| `pnpm test`      | run tests                  |
+| `pnpm format`    | format with Prettier       |
 
 ## license
 

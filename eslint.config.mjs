@@ -1,18 +1,13 @@
-import eslint from "@eslint/js";
-import tseslint from "typescript-eslint";
-import svelte from "eslint-plugin-svelte";
-import globals from "globals";
+import eslint from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import svelte from 'eslint-plugin-svelte';
+import globals from 'globals';
 
-const tsFiles = ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts"];
+const tsFiles = ['**/*.ts', '**/*.tsx', '**/*.mts', '**/*.cts'];
 
 export default tseslint.config(
   {
-    ignores: [
-      "**/dist/**",
-      "**/build/**",
-      "**/.svelte-kit/**",
-      "**/node_modules/**",
-    ],
+    ignores: ['**/dist/**', '**/build/**', '**/.svelte-kit/**', '**/node_modules/**'],
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommended.map((config) => ({
@@ -25,19 +20,16 @@ export default tseslint.config(
       globals: { ...globals.node, ...globals.es2022 },
     },
     rules: {
-      "@typescript-eslint/consistent-type-imports": [
-        "error",
-        { prefer: "type-imports" },
-      ],
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+      '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
     },
   },
-  ...svelte.configs["flat/recommended"],
+  ...svelte.configs['flat/recommended'],
   {
-    files: ["**/*.svelte", "**/*.svelte.ts", "**/*.svelte.js"],
+    files: ['**/*.svelte', '**/*.svelte.ts', '**/*.svelte.js'],
     languageOptions: {
       parserOptions: {
         parser: tseslint.parser,
@@ -45,13 +37,13 @@ export default tseslint.config(
     },
   },
   {
-    files: ["**/*.test.ts"],
+    files: ['**/*.test.ts'],
     languageOptions: {
       globals: { ...globals.vitest },
     },
   },
   {
-    files: ["apps/web/**/*.ts", "apps/web/**/*.js", "apps/web/**/*.svelte"],
+    files: ['apps/web/**/*.ts', 'apps/web/**/*.js', 'apps/web/**/*.svelte'],
     languageOptions: {
       globals: { ...globals.browser },
     },

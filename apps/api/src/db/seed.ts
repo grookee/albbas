@@ -1,6 +1,6 @@
-import { prisma } from "../db/prisma.js";
-import { env } from "../env.js";
-import { hashPassword } from "../auth.js";
+import { prisma } from '../db/prisma.js';
+import { env } from '../env.js';
+import { hashPassword } from '../auth.js';
 
 export async function ensureAdmin(): Promise<void> {
   if (!env.ADMIN_EMAIL || !env.ADMIN_PASSWORD) return;
@@ -12,7 +12,7 @@ export async function ensureAdmin(): Promise<void> {
     data: {
       email: env.ADMIN_EMAIL,
       passwordHash: await hashPassword(env.ADMIN_PASSWORD),
-      role: "ADMIN",
+      role: 'ADMIN',
     },
   });
   console.log(`Seeded initial admin account: ${env.ADMIN_EMAIL}`);

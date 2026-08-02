@@ -1,7 +1,7 @@
-import { env } from "./env.js";
-import { buildServer } from "./server.js";
-import { ensureAdmin } from "./db/seed.js";
-import { closeRedis } from "./lib/redis.js";
+import { env } from './env.js';
+import { buildServer } from './server.js';
+import { ensureAdmin } from './db/seed.js';
+import { closeRedis } from './lib/redis.js';
 
 let shuttingDown = false;
 
@@ -13,8 +13,8 @@ async function shutdown(signal: string): Promise<void> {
   process.exit(0);
 }
 
-process.on("SIGTERM", () => void shutdown("SIGTERM"));
-process.on("SIGINT", () => void shutdown("SIGINT"));
+process.on('SIGTERM', () => void shutdown('SIGTERM'));
+process.on('SIGINT', () => void shutdown('SIGINT'));
 
 async function main(): Promise<void> {
   await ensureAdmin();

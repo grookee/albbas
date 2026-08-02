@@ -1,12 +1,8 @@
-import { TRPCError } from "@trpc/server";
-import {
-  SESSION_COOKIE_NAME,
-  loginSchema,
-  registerSchema,
-} from "@albbas/shared";
-import { prisma } from "../db/prisma.js";
-import { toPublicUser } from "../lib/publicUser.js";
-import { router, publicProcedure, protectedProcedure } from "../trpc.js";
+import { TRPCError } from '@trpc/server';
+import { SESSION_COOKIE_NAME, loginSchema, registerSchema } from '@albbas/shared';
+import { prisma } from '../db/prisma.js';
+import { toPublicUser } from '../lib/publicUser.js';
+import { router, publicProcedure, protectedProcedure } from '../trpc.js';
 import {
   clearSessionCookie,
   createSession,
@@ -15,7 +11,7 @@ import {
   parseCookies,
   setSessionCookie,
   verifyPassword,
-} from "../auth.js";
+} from '../auth.js';
 
 export const authRouter = router({
   me: protectedProcedure.query(({ ctx }) => toPublicUser(ctx.user)),
@@ -26,8 +22,8 @@ export const authRouter = router({
     });
     if (!user || !(await verifyPassword(input.password, user.passwordHash))) {
       throw new TRPCError({
-        code: "UNAUTHORIZED",
-        message: "Invalid email or password",
+        code: 'UNAUTHORIZED',
+        message: 'Invalid email or password',
       });
     }
 
@@ -36,53 +32,51 @@ export const authRouter = router({
     return toPublicUser(user);
   }),
 
-  register: publicProcedure
-    .input(registerSchema)
-    .mutation(async ({ input, ctx }) => {
-      const existing = await prisma.user.findUnique({
-        where: { email: input.email },
+  register: publicProcedure.input(registerSchema).mutation(async ({ input, ctx }) => {
+    const existing = await prisma.user.findUnique({
+      where: { email: input.email },
+    });
+    if (existing) {
+      throw new TRPCError({
+        code: 'CONFLICT',
+        message: 'An account with that email already exists',
       });
-      if (existing) {
-        throw new TRPCError({
-          code: "CONFLICT",
-          message: "An account with that email already exists",
-        });
-      }
+    }
 
-      const invite = await prisma.inviteCode.findUnique({
-        where: { code: input.inviteCode },
+    const invite = await prisma.inviteCode.findUnique({
+      where: { code: input.inviteCode },
+    });
+    if (!invite || invite.usedAt || invite.revokedAt) {
+      throw new TRPCError({
+        code: 'BAD_REQUEST',
+        message: 'Invalid invite code',
       });
-      if (!invite || invite.usedAt || invite.revokedAt) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Invalid invite code",
-        });
-      }
-      if (invite.expiresAt && invite.expiresAt.getTime() <= Date.now()) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Invite code has expired",
-        });
-      }
-
-      const user = await prisma.$transaction(async (tx) => {
-        const created = await tx.user.create({
-          data: {
-            email: input.email,
-            passwordHash: await hashPassword(input.password),
-          },
-        });
-        await tx.inviteCode.update({
-          where: { id: invite.id },
-          data: { usedAt: new Date(), usedById: created.id },
-        });
-        return created;
+    }
+    if (invite.expiresAt && invite.expiresAt.getTime() <= Date.now()) {
+      throw new TRPCError({
+        code: 'BAD_REQUEST',
+        message: 'Invite code has expired',
       });
+    }
 
-      const token = await createSession(user.id);
-      setSessionCookie(ctx.reply, token);
-      return toPublicUser(user);
-    }),
+    const user = await prisma.$transaction(async (tx) => {
+      const created = await tx.user.create({
+        data: {
+          email: input.email,
+          passwordHash: await hashPassword(input.password),
+        },
+      });
+      await tx.inviteCode.update({
+        where: { id: invite.id },
+        data: { usedAt: new Date(), usedById: created.id },
+      });
+      return created;
+    });
+
+    const token = await createSession(user.id);
+    setSessionCookie(ctx.reply, token);
+    return toPublicUser(user);
+  }),
 
   logout: protectedProcedure.mutation(async ({ ctx }) => {
     const token = parseCookies(ctx.request.headers.cookie)[SESSION_COOKIE_NAME];

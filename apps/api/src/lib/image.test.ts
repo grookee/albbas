@@ -1,9 +1,9 @@
-import { describe, expect, it } from "vitest";
-import sharp from "sharp";
-import { autoOrientImage } from "./image.js";
+import { describe, expect, it } from 'vitest';
+import sharp from 'sharp';
+import { autoOrientImage } from './image.js';
 
-describe("autoOrientImage", () => {
-  it("applies EXIF orientation and bakes it into a jpeg", async () => {
+describe('autoOrientImage', () => {
+  it('applies EXIF orientation and bakes it into a jpeg', async () => {
     const raw = await sharp({
       create: {
         width: 100,
@@ -16,7 +16,7 @@ describe("autoOrientImage", () => {
       .withMetadata({ orientation: 6 })
       .toBuffer();
 
-    const out = await autoOrientImage(raw, "image/jpeg");
+    const out = await autoOrientImage(raw, 'image/jpeg');
     expect(out).not.toEqual(raw);
 
     const meta = await sharp(out).metadata();
@@ -25,7 +25,7 @@ describe("autoOrientImage", () => {
     expect(meta.orientation).not.toBe(6);
   });
 
-  it("returns the buffer unchanged when there is no EXIF orientation", async () => {
+  it('returns the buffer unchanged when there is no EXIF orientation', async () => {
     const raw = await sharp({
       create: {
         width: 40,
@@ -37,17 +37,17 @@ describe("autoOrientImage", () => {
       .png()
       .toBuffer();
 
-    const out = await autoOrientImage(raw, "image/png");
+    const out = await autoOrientImage(raw, 'image/png');
     expect(out).toEqual(raw);
   });
 
-  it("skips non-images", async () => {
-    const raw = Buffer.from("hello world");
-    await expect(autoOrientImage(raw, "text/plain")).resolves.toEqual(raw);
+  it('skips non-images', async () => {
+    const raw = Buffer.from('hello world');
+    await expect(autoOrientImage(raw, 'text/plain')).resolves.toEqual(raw);
   });
 
-  it("skips animated gifs", async () => {
-    const raw = Buffer.from("fake gif bytes");
-    await expect(autoOrientImage(raw, "image/gif")).resolves.toEqual(raw);
+  it('skips animated gifs', async () => {
+    const raw = Buffer.from('fake gif bytes');
+    await expect(autoOrientImage(raw, 'image/gif')).resolves.toEqual(raw);
   });
 });

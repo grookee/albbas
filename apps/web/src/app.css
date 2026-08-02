@@ -24,8 +24,7 @@
   --orange: #d65d0e;
   --orange-b: #fe8019;
 
-  --font-mono:
-    ui-monospace, "Cascadia Code", "JetBrains Mono", Menlo, Consolas, monospace;
+  --font-mono: ui-monospace, 'Cascadia Code', 'JetBrains Mono', Menlo, Consolas, monospace;
   --radius: 3px;
 }
 
@@ -450,7 +449,7 @@ main.container {
   color: var(--fg0);
 }
 
-.dropzone input[type="file"] {
+.dropzone input[type='file'] {
   display: none;
 }
 

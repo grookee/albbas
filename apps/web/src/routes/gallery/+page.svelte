@@ -159,7 +159,12 @@
           <div class="gallery-item">
             <a class="gallery-thumb" href={upload.url} target="_blank" rel="external noreferrer">
               {#if isImage(upload.mimeType) && !failed[upload.id]}
-                <img src={upload.url} alt={upload.originalName} loading="lazy" onerror={() => markFailed(upload.id)} />
+                <img
+                  src={upload.url}
+                  alt={upload.originalName}
+                  loading="lazy"
+                  onerror={() => markFailed(upload.id)}
+                />
               {:else if isVideo(upload.mimeType) && !failed[upload.id]}
                 <!-- svelte-ignore a11y_media_has_caption -->
                 <video
@@ -184,8 +189,11 @@
               </span>
               <div class="gallery-actions">
                 <CopyButton text={upload.url} />
-                <a class="btn btn-secondary btn-sm" href={upload.url} target="_blank" rel="external noreferrer"
-                  >open</a
+                <a
+                  class="btn btn-secondary btn-sm"
+                  href={upload.url}
+                  target="_blank"
+                  rel="external noreferrer">open</a
                 >
                 <button
                   class="btn btn-danger btn-sm"
@@ -202,7 +210,11 @@
 
       {#if totalPages > 1}
         <nav class="pagination" aria-label="gallery pages">
-          <button class="btn btn-secondary btn-sm" onclick={() => goTo(page - 1)} disabled={page <= 1}>
+          <button
+            class="btn btn-secondary btn-sm"
+            onclick={() => goTo(page - 1)}
+            disabled={page <= 1}
+          >
             ← prev
           </button>
           {#each pageNumbers() as p (p)}

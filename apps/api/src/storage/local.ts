@@ -1,12 +1,8 @@
-import { createReadStream, createWriteStream } from "node:fs";
-import { mkdir, rm } from "node:fs/promises";
-import { dirname } from "node:path";
-import { pipeline } from "node:stream/promises";
-import type {
-  GetObjectResult,
-  PutObjectInput,
-  StorageBackend,
-} from "./types.js";
+import { createReadStream, createWriteStream } from 'node:fs';
+import { mkdir, rm } from 'node:fs/promises';
+import { dirname } from 'node:path';
+import { pipeline } from 'node:stream/promises';
+import type { GetObjectResult, PutObjectInput, StorageBackend } from './types.js';
 
 export function createLocalStorage(dir: string): StorageBackend {
   async function pathFor(key: string): Promise<string> {

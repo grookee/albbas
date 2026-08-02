@@ -26,15 +26,7 @@
   {#if label}
     <label for={name}>{label}</label>
   {/if}
-  <input
-    id={name}
-    name={name}
-    {type}
-    {placeholder}
-    {autocomplete}
-    {required}
-    bind:value
-  />
+  <input id={name} {name} {type} {placeholder} {autocomplete} {required} bind:value />
   {#if hint}
     <p class="hint">{hint}</p>
   {/if}

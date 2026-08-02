@@ -1,11 +1,11 @@
-import { defineConfig } from "tsup";
+import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  entry: ["src/index.ts"],
-  format: ["esm"],
-  target: "node22",
+  entry: ['src/index.ts'],
+  format: ['esm'],
+  target: 'node22',
   clean: true,
   sourcemap: true,
-  external: ["@prisma/client", "@node-rs/argon2"],
-  noExternal: ["@albbas/shared"],
+  external: ['@prisma/client', '@node-rs/argon2'],
+  noExternal: ['@albbas/shared'],
 });

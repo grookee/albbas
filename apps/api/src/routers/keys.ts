@@ -1,25 +1,16 @@
-import { TRPCError } from "@trpc/server";
-import { z } from "zod";
-import {
-  API_KEY_PREFIX,
-  createApiKeySchema,
-  generateApiKey,
-} from "@albbas/shared";
-import { prisma } from "../db/prisma.js";
-import { env } from "../env.js";
-import {
-  decryptSecret,
-  encryptionKeyFromSecret,
-  encryptSecret,
-  sha256Hex,
-} from "../lib/crypto.js";
-import { router, protectedProcedure } from "../trpc.js";
+import { TRPCError } from '@trpc/server';
+import { z } from 'zod';
+import { API_KEY_PREFIX, createApiKeySchema, generateApiKey } from '@albbas/shared';
+import { prisma } from '../db/prisma.js';
+import { env } from '../env.js';
+import { decryptSecret, encryptionKeyFromSecret, encryptSecret, sha256Hex } from '../lib/crypto.js';
+import { router, protectedProcedure } from '../trpc.js';
 
 export const keysRouter = router({
   list: protectedProcedure.query(async ({ ctx }) => {
     const keys = await prisma.apiKey.findMany({
       where: { userId: ctx.user.id, revokedAt: null },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
       select: {
         id: true,
         name: true,
@@ -37,30 +28,28 @@ export const keysRouter = router({
     }));
   }),
 
-  create: protectedProcedure
-    .input(createApiKeySchema)
-    .mutation(async ({ input, ctx }) => {
-      const { raw, prefix } = generateApiKey();
-      const fullKey = `${API_KEY_PREFIX}${raw}`;
-      const encryptionKey = encryptionKeyFromSecret(env.ENCRYPTION_KEY);
-      const key = await prisma.apiKey.create({
-        data: {
-          name: input.name,
-          prefix,
-          keyHash: sha256Hex(fullKey),
-          keyEnc: encryptSecret(fullKey, encryptionKey),
-          userId: ctx.user.id,
-        },
-        select: { id: true, name: true, createdAt: true },
-      });
-      return {
-        id: key.id,
-        name: key.name,
-        createdAt: key.createdAt.toISOString(),
+  create: protectedProcedure.input(createApiKeySchema).mutation(async ({ input, ctx }) => {
+    const { raw, prefix } = generateApiKey();
+    const fullKey = `${API_KEY_PREFIX}${raw}`;
+    const encryptionKey = encryptionKeyFromSecret(env.ENCRYPTION_KEY);
+    const key = await prisma.apiKey.create({
+      data: {
+        name: input.name,
         prefix,
-        key: fullKey,
-      };
-    }),
+        keyHash: sha256Hex(fullKey),
+        keyEnc: encryptSecret(fullKey, encryptionKey),
+        userId: ctx.user.id,
+      },
+      select: { id: true, name: true, createdAt: true },
+    });
+    return {
+      id: key.id,
+      name: key.name,
+      createdAt: key.createdAt.toISOString(),
+      prefix,
+      key: fullKey,
+    };
+  }),
 
   reveal: protectedProcedure
     .input(z.object({ id: z.string().min(1) }))
@@ -71,14 +60,14 @@ export const keysRouter = router({
       });
       if (!key)
         throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "API key not found",
+          code: 'NOT_FOUND',
+          message: 'API key not found',
         });
       if (!key.keyEnc)
         throw new TRPCError({
-          code: "BAD_REQUEST",
+          code: 'BAD_REQUEST',
           message:
-            "This key predates config downloads. Revoke it and create a new one to get its config.",
+            'This key predates config downloads. Revoke it and create a new one to get its config.',
         });
       const encryptionKey = encryptionKeyFromSecret(env.ENCRYPTION_KEY);
       return {
@@ -96,8 +85,8 @@ export const keysRouter = router({
       });
       if (!key)
         throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "API key not found",
+          code: 'NOT_FOUND',
+          message: 'API key not found',
         });
 
       await prisma.apiKey.update({

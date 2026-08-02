@@ -13,7 +13,6 @@
 <pre class="codeblock"><code>{text}</code><button
     class="copy-btn btn btn-secondary btn-sm"
     onclick={copy}
-    title="Copy to clipboard"
-  >
+    title="Copy to clipboard">
     {copied ? 'copied' : 'copy'}
   </button></pre>

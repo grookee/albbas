@@ -10,14 +10,13 @@ type DialogSpec = {
   alert: boolean;
 };
 
-export const confirmState = $state<{ current: DialogSpec | null }>({ current: null });
+export const confirmState = $state<{ current: DialogSpec | null }>({
+  current: null,
+});
 
 let resolveFn: ((value: boolean) => void) | null = null;
 
-export function confirm(
-  message: string,
-  options: ConfirmOptions = {},
-): Promise<boolean> {
+export function confirm(message: string, options: ConfirmOptions = {}): Promise<boolean> {
   return new Promise((resolve) => {
     resolveFn = resolve;
     confirmState.current = {

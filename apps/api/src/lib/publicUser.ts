@@ -1,11 +1,8 @@
-import type { User } from "@prisma/client";
-import type { PublicUser } from "@albbas/shared";
-import { toAllowedDomain } from "./domain.js";
+import type { User } from '@prisma/client';
+import type { PublicUser } from '@albbas/shared';
+import { toAllowedDomain } from './domain.js';
 
-type UserFields = Pick<
-  User,
-  "id" | "email" | "role" | "domain" | "subdomain" | "createdAt"
->;
+type UserFields = Pick<User, 'id' | 'email' | 'role' | 'domain' | 'subdomain' | 'createdAt'>;
 
 export function toPublicUser(user: UserFields): PublicUser {
   return {

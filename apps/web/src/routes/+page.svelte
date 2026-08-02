@@ -57,9 +57,7 @@
       const form = new FormData();
       form.append('file', file);
       const res = await fetch('/api/upload', { method: 'POST', body: form });
-      const body = (await res.json().catch(() => null)) as
-        | { url?: string; error?: string }
-        | null;
+      const body = (await res.json().catch(() => null)) as { url?: string; error?: string } | null;
       if (!res.ok) {
         throw new Error(body?.error ?? `Upload failed (HTTP ${res.status})`);
       }
@@ -107,8 +105,8 @@
   <section class="hero">
     <h1>private file hosting.</h1>
     <p>
-      Upload a file, get a short unguessable link on your own domain. Files are served
-      directly, deleted whenever you say so.
+      Upload a file, get a short unguessable link on your own domain. Files are served directly,
+      deleted whenever you say so.
     </p>
     <p class="muted">no tracking, no accounts for visitors, nothing public.</p>
     <div class="actions">
@@ -209,9 +207,8 @@
               <td class="muted">{formatBytes(upload.sizeBytes)}</td>
               <td class="muted">{formatDate(upload.createdAt)}</td>
               <td class="actions">
-                <button
-                  class="btn btn-danger btn-sm"
-                  onclick={() => onDelete(upload)}>delete</button
+                <button class="btn btn-danger btn-sm" onclick={() => onDelete(upload)}
+                  >delete</button
                 >
               </td>
             </tr>

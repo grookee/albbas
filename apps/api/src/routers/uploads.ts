@@ -1,10 +1,10 @@
-import { TRPCError } from "@trpc/server";
-import { z } from "zod";
-import { prisma } from "../db/prisma.js";
-import { delUploadCache } from "../lib/cache.js";
-import { extensionForMimeType } from "../lib/mime.js";
-import { storage } from "../storage/instance.js";
-import { router, protectedProcedure } from "../trpc.js";
+import { TRPCError } from '@trpc/server';
+import { z } from 'zod';
+import { prisma } from '../db/prisma.js';
+import { delUploadCache } from '../lib/cache.js';
+import { extensionForMimeType } from '../lib/mime.js';
+import { storage } from '../storage/instance.js';
+import { router, protectedProcedure } from '../trpc.js';
 
 const uploadListSchema = z.object({
   cursor: z.string().datetime().optional(),
@@ -39,51 +39,43 @@ function toItem(upload: UploadRecord) {
 }
 
 export const uploadsRouter = router({
-  list: protectedProcedure
-    .input(uploadListSchema)
-    .query(async ({ ctx, input }) => {
-      const uploads = await prisma.upload.findMany({
-        where: {
-          userId: ctx.user.id,
-          ...(input.cursor
-            ? { createdAt: { lt: new Date(input.cursor) } }
-            : {}),
-        },
-        orderBy: { createdAt: "desc" },
+  list: protectedProcedure.input(uploadListSchema).query(async ({ ctx, input }) => {
+    const uploads = await prisma.upload.findMany({
+      where: {
+        userId: ctx.user.id,
+        ...(input.cursor ? { createdAt: { lt: new Date(input.cursor) } } : {}),
+      },
+      orderBy: { createdAt: 'desc' },
+      take: input.limit,
+    });
+
+    return {
+      items: uploads.map(toItem),
+      nextCursor:
+        uploads.length === input.limit ? (uploads.at(-1)?.createdAt.toISOString() ?? null) : null,
+    };
+  }),
+
+  gallery: protectedProcedure.input(uploadGallerySchema).query(async ({ ctx, input }) => {
+    const where = { userId: ctx.user.id };
+    const [uploads, total] = await Promise.all([
+      prisma.upload.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: (input.page - 1) * input.limit,
         take: input.limit,
-      });
+      }),
+      prisma.upload.count({ where }),
+    ]);
 
-      return {
-        items: uploads.map(toItem),
-        nextCursor:
-          uploads.length === input.limit
-            ? (uploads.at(-1)?.createdAt.toISOString() ?? null)
-            : null,
-      };
-    }),
-
-  gallery: protectedProcedure
-    .input(uploadGallerySchema)
-    .query(async ({ ctx, input }) => {
-      const where = { userId: ctx.user.id };
-      const [uploads, total] = await Promise.all([
-        prisma.upload.findMany({
-          where,
-          orderBy: { createdAt: "desc" },
-          skip: (input.page - 1) * input.limit,
-          take: input.limit,
-        }),
-        prisma.upload.count({ where }),
-      ]);
-
-      return {
-        items: uploads.map(toItem),
-        page: input.page,
-        limit: input.limit,
-        total,
-        totalPages: Math.max(1, Math.ceil(total / input.limit)),
-      };
-    }),
+    return {
+      items: uploads.map(toItem),
+      page: input.page,
+      limit: input.limit,
+      total,
+      totalPages: Math.max(1, Math.ceil(total / input.limit)),
+    };
+  }),
 
   delete: protectedProcedure
     .input(z.object({ slug: z.string().min(1) }))
@@ -91,10 +83,9 @@ export const uploadsRouter = router({
       const upload = await prisma.upload.findUnique({
         where: { slug: input.slug },
       });
-      if (!upload)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Upload not found" });
+      if (!upload) throw new TRPCError({ code: 'NOT_FOUND', message: 'Upload not found' });
       if (upload.userId !== ctx.user.id) {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Not your upload" });
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Not your upload' });
       }
 
       await storage.delete(upload.s3Key).catch(() => undefined);

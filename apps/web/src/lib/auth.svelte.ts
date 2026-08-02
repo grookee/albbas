@@ -1,5 +1,5 @@
-import type { PublicUser } from "@albbas/shared";
-import { trpc } from "./trpc";
+import type { PublicUser } from '@albbas/shared';
+import { trpc } from './trpc';
 
 export const auth = $state<{ user: PublicUser | null; ready: boolean }>({
   user: null,

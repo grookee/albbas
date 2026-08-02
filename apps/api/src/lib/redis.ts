@@ -1,5 +1,5 @@
-import { Redis } from "ioredis";
-import { env } from "../env.js";
+import { Redis } from 'ioredis';
+import { env } from '../env.js';
 
 let client: Redis | null = null;
 let connecting: Promise<Redis | null> | null = null;
@@ -16,7 +16,7 @@ export async function getRedis(): Promise<Redis | null> {
       try {
         await candidate.connect();
       } catch {
-        console.warn("Redis unavailable; caching and rate limiting disabled.");
+        console.warn('Redis unavailable; caching and rate limiting disabled.');
         candidate.disconnect();
         return null;
       }
