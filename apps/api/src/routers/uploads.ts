@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { prisma } from "../db/prisma.js";
 import { delUploadCache } from "../lib/cache.js";
+import { extensionForMimeType } from "../lib/mime.js";
 import { storage } from "../storage/instance.js";
 import { router, protectedProcedure } from "../trpc.js";
 
@@ -32,7 +33,7 @@ export const uploadsRouter = router({
           originalName: upload.originalName,
           mimeType: upload.mimeType,
           sizeBytes: upload.sizeBytes,
-          url: `${upload.baseUrl}/${upload.slug}`,
+          url: `${upload.baseUrl}/${upload.slug}${extensionForMimeType(upload.mimeType)}`,
           createdAt: upload.createdAt.toISOString(),
         })),
         nextCursor:

@@ -6,6 +6,7 @@ import { prisma } from "../db/prisma.js";
 import { env } from "../env.js";
 import { delUploadCache, setUploadCache } from "../lib/cache.js";
 import { baseUrlForUser } from "../lib/domain.js";
+import { extensionForMimeType } from "../lib/mime.js";
 import { isRateLimited } from "../lib/rateLimit.js";
 import { ByteCounter } from "../lib/streams.js";
 import { storage } from "../storage/instance.js";
@@ -112,7 +113,7 @@ async function handleUpload(
   });
   await setUploadCache(slug, { s3Key, mimeType, originalName, sizeBytes });
 
-  const url = `${baseUrl}/${slug}`;
+  const url = `${baseUrl}/${slug}${extensionForMimeType(mimeType)}`;
   const deleteUrl = `${baseUrl}/api/upload/${slug}`;
   return reply.code(201).send({ url, deleteUrl });
 }

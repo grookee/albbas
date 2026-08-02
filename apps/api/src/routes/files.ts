@@ -8,7 +8,10 @@ import {
 } from "../lib/cache.js";
 import { storage } from "../storage/instance.js";
 
-const SLUG_PATTERN = /^[A-Za-z0-9]{9}$/;
+function parseSlug(raw: string): string | null {
+  const match = raw.match(/^([A-Za-z0-9]{9})(?:\.[A-Za-z0-9]+)?$/);
+  return match?.[1] ?? null;
+}
 
 const INLINE_PREFIXES = [
   "image/",
@@ -54,9 +57,9 @@ async function serveFile(
   }>,
   reply: FastifyReply,
 ): Promise<FastifyReply | undefined> {
-  const { slug } = request.params;
-  if (!SLUG_PATTERN.test(slug))
-    return reply.code(404).type("text/plain").send("404: not found");
+  const rawSlug = request.params.slug;
+  const slug = parseSlug(rawSlug);
+  if (!slug) return reply.code(404).type("text/plain").send("404: not found");
 
   const upload = await resolveUpload(slug);
   if (!upload) return reply.code(404).type("text/plain").send("404: not found");
