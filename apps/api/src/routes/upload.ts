@@ -1,14 +1,14 @@
 import { generateSlug } from "@albbas/shared";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { pipeline } from "node:stream/promises";
+import { Readable } from "node:stream";
 import { authenticateRequest } from "../auth.js";
 import { prisma } from "../db/prisma.js";
 import { env } from "../env.js";
 import { delUploadCache, setUploadCache } from "../lib/cache.js";
 import { baseUrlForUser } from "../lib/domain.js";
+import { autoOrientImage } from "../lib/image.js";
 import { extensionForMimeType } from "../lib/mime.js";
 import { isRateLimited } from "../lib/rateLimit.js";
-import { ByteCounter } from "../lib/streams.js";
 import { storage } from "../storage/instance.js";
 
 const SLUG_PATTERN = /^[A-Za-z0-9]{9}$/;
@@ -74,31 +74,29 @@ async function handleUpload(
   const originalName = sanitizeFilename(file.filename) || "file";
   const mimeType = file.mimetype || "application/octet-stream";
 
-  const slug = await generateUniqueSlug();
-  const s3Key = `uploads/${slug}`;
-
-  const counter = new ByteCounter();
-  const putPromise = storage.put(s3Key, {
-    stream: counter,
-    contentType: mimeType,
-  });
-
-  try {
-    await pipeline(file.file, counter);
-  } catch (err) {
-    await putPromise.catch(() => undefined);
-    await storage.delete(s3Key).catch(() => undefined);
-    throw err;
-  }
-  await putPromise;
-
-  const sizeBytes = counter.bytes;
-  if (sizeBytes > env.MAX_UPLOAD_BYTES) {
-    await storage.delete(s3Key).catch(() => undefined);
+  const raw = await file.toBuffer();
+  if (raw.length > env.MAX_UPLOAD_BYTES) {
     return reply
       .code(413)
       .send({ error: `File exceeds the ${env.MAX_UPLOAD_BYTES} byte limit` });
   }
+
+  const body = await autoOrientImage(raw, mimeType);
+
+  const slug = await generateUniqueSlug();
+  const s3Key = `uploads/${slug}`;
+
+  try {
+    await storage.put(s3Key, {
+      stream: Readable.from(body),
+      contentType: mimeType,
+    });
+  } catch (err) {
+    await storage.delete(s3Key).catch(() => undefined);
+    throw err;
+  }
+
+  const sizeBytes = body.length;
 
   await prisma.upload.create({
     data: {
