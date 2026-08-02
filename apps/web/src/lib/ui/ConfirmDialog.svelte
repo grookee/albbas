@@ -34,8 +34,13 @@
       <h3 id="confirm-title">{confirmState.current.title}</h3>
       <p id="confirm-message">{confirmState.current.message}</p>
       <div class="dialog-actions">
-        <button class="btn btn-secondary" onclick={() => settleConfirm(false)}>cancel</button>
-        <button class="btn btn-danger" onclick={() => settleConfirm(true)}>
+        {#if !confirmState.current.alert}
+          <button class="btn btn-secondary" onclick={() => settleConfirm(false)}>cancel</button>
+        {/if}
+        <button
+          class={confirmState.current.alert ? 'btn btn-secondary' : 'btn btn-danger'}
+          onclick={() => settleConfirm(true)}
+        >
           {confirmState.current.confirmLabel}
         </button>
       </div>

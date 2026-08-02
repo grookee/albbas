@@ -3,7 +3,7 @@
   import { auth } from '$lib/auth.svelte';
   import { trpc, errorMessage } from '$lib/trpc';
   import { formatBytes, formatDate } from '$lib/format';
-  import { confirm } from '$lib/confirm.svelte';
+  import { confirm, alert } from '$lib/confirm.svelte';
   import FileIcon from '$lib/ui/FileIcon.svelte';
   import CopyButton from '$lib/ui/CopyButton.svelte';
 
@@ -30,16 +30,19 @@
   let deletingId = $state<string | null>(null);
   let failed = $state<Record<string, boolean>>({});
 
-  async function load(): Promise<void> {
-    loading = true;
+  async function load(silent = false): Promise<string | null> {
+    if (!silent) loading = true;
     error = null;
     try {
       const res = await trpc.uploads.gallery.query({ page, limit: PAGE_SIZE });
       items = res.items;
       totalPages = res.totalPages;
       total = res.total;
+      return null;
     } catch (err) {
-      error = errorMessage(err);
+      const message = errorMessage(err);
+      if (!silent) error = message;
+      return message;
     } finally {
       loading = false;
     }
@@ -99,9 +102,18 @@
     error = null;
     try {
       await trpc.uploads.delete.mutate({ slug: upload.slug });
-      await load();
+      items = items.filter((u) => u.id !== upload.id);
+      total = total - 1;
+      if (items.length === 0 && page > 1) {
+        page = page - 1;
+        failed = {};
+        await load();
+      } else {
+        const message = await load(true);
+        if (message) await alert(message);
+      }
     } catch (err) {
-      error = errorMessage(err);
+      await alert(errorMessage(err));
     } finally {
       deletingId = null;
     }

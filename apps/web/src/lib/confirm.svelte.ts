@@ -3,13 +3,14 @@ export type ConfirmOptions = {
   confirmLabel?: string;
 };
 
-type ConfirmSpec = {
+type DialogSpec = {
   title: string;
   message: string;
   confirmLabel: string;
+  alert: boolean;
 };
 
-export const confirmState = $state<{ current: ConfirmSpec | null }>({ current: null });
+export const confirmState = $state<{ current: DialogSpec | null }>({ current: null });
 
 let resolveFn: ((value: boolean) => void) | null = null;
 
@@ -23,6 +24,19 @@ export function confirm(
       title: options.title ?? 'are you sure?',
       message,
       confirmLabel: options.confirmLabel ?? 'confirm',
+      alert: false,
+    };
+  });
+}
+
+export function alert(message: string, options: ConfirmOptions = {}): Promise<void> {
+  return new Promise((resolve) => {
+    resolveFn = () => resolve();
+    confirmState.current = {
+      title: options.title ?? 'error',
+      message,
+      confirmLabel: options.confirmLabel ?? 'ok',
+      alert: true,
     };
   });
 }
