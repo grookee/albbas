@@ -66,7 +66,6 @@
   let creatingKey = $state(false);
   let keysError = $state<string | null>(null);
   let activeKey: { id: string; name: string; key: string } | null = $state(null);
-  let activeKeyIsNew = $state(false);
   let revealingId = $state<string | null>(null);
   let configError = $state<string | null>(null);
 
@@ -80,7 +79,6 @@
     try {
       const created = await trpc.keys.create.mutate({ name: keyName });
       activeKey = { id: created.id, name: created.name, key: created.key };
-      activeKeyIsNew = true;
       configError = null;
       keyName = '';
       await loadKeys();
@@ -97,7 +95,6 @@
     try {
       const revealed = await trpc.keys.reveal.query({ id: key.id });
       activeKey = { id: revealed.id, name: revealed.name, key: revealed.key };
-      activeKeyIsNew = false;
     } catch (err) {
       configError = errorMessage(err);
     } finally {
@@ -260,7 +257,7 @@
 
   <section class="card">
     <h2>api keys</h2>
-    <p class="muted-note">keys are used by uploader clients (ShareX, uPic). the full key is shown only once when created, but you can re-download its config anytime.</p>
+    <p class="muted-note">keys are used by uploader clients (ShareX, uPic). pick one and download its config below.</p>
     <div class="form-row" style="margin-bottom: 1rem">
       <div style="flex: 1">
         <Field name="key-name" label="name" placeholder="work mac" bind:value={keyName} />
@@ -322,16 +319,7 @@
     {:else if !origin}
       <div class="muted">loading…</div>
     {:else}
-      {#if activeKeyIsNew}
-        <p class="muted-note">
-          key <span style="color: var(--fg1)">{activeKey.name}</span> — save it now, the full key is
-          shown only once. you can re-download its config anytime.
-        </p>
-      {:else}
-        <p class="muted-note">
-          key <span style="color: var(--fg1)">{activeKey.name}</span>
-        </p>
-      {/if}
+      <p class="muted-note">key <span style="color: var(--fg1)">{activeKey.name}</span></p>
 
       <h3 style="margin-bottom: 0.25rem">sharex</h3>
       <p class="muted-note">
