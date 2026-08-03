@@ -113,8 +113,11 @@ function numberLines(html: string): string {
   const lines = html.split('\n');
   if (lines.at(-1) === '') lines.pop();
   return lines
-    .map((line, index) => `<span class="pln">${index + 1}</span><span class="plc">${line}</span>`)
-    .join('\n');
+    .map(
+      (line, index) =>
+        `<span class="ln"><span class="pln">${index + 1}</span><span class="plc">${line}</span></span>`,
+    )
+    .join('');
 }
 
 function formatDate(date: Date): string {
@@ -140,9 +143,9 @@ export function renderPastePage(opts: PastePageOptions): string {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${title} — albbas</title>
 <style>
-:root{--bg:#282828;--panel:#3c3836;--panel2:#504945;--border:#665c54;--fg:#ebdbb2;--muted:#928374;--orange:#fe8019}
+:root{--bg:#282828;--panel:#3c3836;--panel2:#504945;--border:#665c54;--fg:#ebdbb2;--muted:#928374;--orange:#fe8019;--fs:14px}
 *{box-sizing:border-box}html,body{margin:0;padding:0}
-body{background:var(--bg);color:var(--fg);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:14px;line-height:1.6}
+body{background:var(--bg);color:var(--fg);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:var(--fs);line-height:1.6}
 .top{display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;background:var(--panel);border-bottom:1px solid var(--border);flex-wrap:wrap}
 .brand{color:var(--orange);font-weight:700;text-decoration:none}
 .langs{background:var(--panel2);border:1px solid var(--border);border-radius:999px;padding:0.1rem 0.6rem;color:var(--muted);font-size:12px}
@@ -151,8 +154,11 @@ body{background:var(--bg);color:var(--fg);font-family:ui-monospace,SFMono-Regula
 .act{display:flex;gap:0.4rem}
 .act a,.act button{cursor:pointer;font:inherit;font-size:12px;color:var(--fg);background:var(--panel2);border:1px solid var(--border);border-radius:6px;padding:0.25rem 0.7rem;text-decoration:none}
 .act a:hover,.act button:hover{border-color:var(--muted)}
+.act button.on{color:var(--orange);border-color:var(--orange)}
 .wrap{padding:1rem;max-width:1200px;margin:0 auto}
 .code{margin:0;padding:0;overflow:auto;background:var(--panel);border:1px solid var(--border);border-radius:8px;max-height:75vh}
+.code.wrap{white-space:pre-wrap;overflow-x:hidden}
+.code.wrap .plc{white-space:pre-wrap}
 .code .ln{display:flex}
 .pln{display:inline-block;min-width:3.5rem;padding:0 0.75rem;text-align:right;color:var(--muted);user-select:none;background:var(--panel2);border-right:1px solid var(--border)}
 .plc{display:block;padding:0 1rem;white-space:pre}
@@ -174,6 +180,10 @@ body{background:var(--bg);color:var(--fg);font-family:ui-monospace,SFMono-Regula
   <span class="spacer"></span>
   <span class="meta">${meta.join(' · ')}</span>
   <span class="act">
+    <button id="fs-dec" title="Decrease font size" aria-label="Decrease font size">A−</button>
+    <button id="fs-inc" title="Increase font size" aria-label="Increase font size">A+</button>
+    <button id="fs-reset" title="Reset font size" aria-label="Reset font size">reset</button>
+    <button id="wrap" title="Toggle line wrap" aria-label="Toggle line wrap">wrap</button>
     <a href="${rawUrl}" rel="external">raw</a>
     <button id="copy">copy</button>
   </span>
@@ -182,7 +192,24 @@ body{background:var(--bg);color:var(--fg);font-family:ui-monospace,SFMono-Regula
 <pre class="code"><code class="hljs language-${language}">${numberLines(codeHtml)}</code></pre>
 </div>
 <script>
-(function(){const b=document.getElementById("copy");b.addEventListener("click",async()=>{try{const r=await fetch("${rawUrl}");const t=await r.text();await navigator.clipboard.writeText(t);const o=b.textContent;b.textContent="copied";setTimeout(()=>b.textContent=o,1500);}catch{}})})();
+(function(){
+var root=document.documentElement,code=document.querySelector(".code");
+var DEF=14,MIN=9,MAX=36;
+function fs(){var v=parseInt(root.style.getPropertyValue("--fs"),10);return isNaN(v)?DEF:v;}
+function setFs(v){v=Math.max(MIN,Math.min(MAX,v));root.style.setProperty("--fs",v+"px");try{localStorage.setItem("paste-fs",String(v));}catch(e){}}
+try{var saved=parseInt(localStorage.getItem("paste-fs"),10);if(!isNaN(saved))setFs(saved);}catch(e){}
+var dec=document.getElementById("fs-dec"),inc=document.getElementById("fs-inc"),res=document.getElementById("fs-reset");
+dec.addEventListener("click",function(){setFs(fs()-1);});
+inc.addEventListener("click",function(){setFs(fs()+1);});
+res.addEventListener("click",function(){setFs(DEF);});
+var wrapBtn=document.getElementById("wrap");
+function setWrap(on){code.classList.toggle("wrap",on);wrapBtn.classList.toggle("on",on);try{localStorage.setItem("paste-wrap",on?"1":"0");}catch(e){}}
+var wrapSaved=false;try{wrapSaved=localStorage.getItem("paste-wrap")==="1";}catch(e){}
+setWrap(wrapSaved);
+wrapBtn.addEventListener("click",function(){setWrap(!code.classList.contains("wrap"));});
+var b=document.getElementById("copy");
+b.addEventListener("click",async()=>{try{const r=await fetch("${rawUrl}");const t=await r.text();await navigator.clipboard.writeText(t);const o=b.textContent;b.textContent="copied";setTimeout(()=>b.textContent=o,1500);}catch{}});
+})();
 </script>
 </body>
 </html>`;
