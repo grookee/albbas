@@ -63,4 +63,4 @@ export const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
 
 export const SUBDOMAIN_PATTERN = /^(?!-)[a-z0-9-]{1,63}(?<!-)$/;
 
-export const PUBLIC_CACHE_CONTROL = 'public, max-age=31536000, immutable';
+export const PUBLIC_CACHE_CONTROL = 'public, max-age=3600';

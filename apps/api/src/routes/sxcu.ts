@@ -33,9 +33,9 @@ async function buildSxcu(
     FileFormName: 'file',
     Headers: { 'X-Api-Key': rawKey },
     Arguments: { url: '{input}' },
-    URL: '{response:url}',
-    DeletionURL: '{response:deleteUrl}',
-    ErrorMessage: '{response:error}',
+    URL: '{json:url}',
+    DeletionURL: '{json:deleteUrl}',
+    ErrorMessage: '{json:error}',
   };
 
   return reply
