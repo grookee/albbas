@@ -6,6 +6,7 @@ import {
 } from '@albbas/shared';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { prisma } from '../db/prisma.js';
+import { env } from '../env.js';
 import { getPastePageCache, setPastePageCache } from '../lib/cache.js';
 import { renderPastePage } from '../lib/highlight.js';
 import { storage } from '../storage/instance.js';
@@ -92,6 +93,7 @@ async function handlePaste(
     language: paste.language,
     content,
     baseUrl: paste.baseUrl,
+    webUrl: env.APP_URL,
     sizeBytes: paste.sizeBytes,
     createdAt: paste.createdAt,
     visits: paste.visits,

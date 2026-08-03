@@ -42,6 +42,7 @@ describe('renderPastePage', () => {
     language: 'javascript',
     content: 'const x = 1;\n// hi',
     baseUrl: 'https://i.mateakos.com',
+    webUrl: 'https://albbas.mateakos.com',
     sizeBytes: 22,
     createdAt: new Date('2026-08-03T00:00:00Z'),
     visits: 3,
@@ -55,6 +56,8 @@ describe('renderPastePage', () => {
     expect(html).toContain('language-javascript');
     expect(html).toContain('raw');
     expect(html).toContain('?raw=1');
+    expect(html).toContain('href="https://albbas.mateakos.com"');
+    expect(html).not.toContain('href="https://i.mateakos.com"');
   });
 
   it('escapes malicious title and language', () => {

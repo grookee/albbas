@@ -126,6 +126,7 @@
     return JSON.stringify(
       {
         Name: 'albbas',
+        Version: '17.0.0',
         DestinationType: 'ImageUploader, TextUploader, FileUploader, URLShortener',
         RequestMethod: 'POST',
         RequestURL: `${origin}/api/upload`,

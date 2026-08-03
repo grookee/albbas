@@ -5,6 +5,7 @@ import { authenticateRequest } from '../auth.js';
 import { prisma } from '../db/prisma.js';
 import { env } from '../env.js';
 import { delPastePageCache, delUploadCache, setUploadCache } from '../lib/cache.js';
+import { deletionSignature, verifyDeletionSignature } from '../lib/crypto.js';
 import { baseUrlForUser } from '../lib/domain.js';
 import { autoOrientImage } from '../lib/image.js';
 import { extensionForMimeType } from '../lib/mime.js';
@@ -51,6 +52,10 @@ async function generateUniqueSlug(
 
 function rateLimitKey(key: { id: string } | null, user: { id: string }): string {
   return key ? `key:${key.id}` : `user:${user.id}`;
+}
+
+function deletionUrlFor(baseUrl: string, slug: string): string {
+  return `${baseUrl}/api/upload/${slug}?sig=${deletionSignature(slug, env.ENCRYPTION_KEY)}`;
 }
 
 type Auth = { user: { id: string }; key: { id: string } | null };
@@ -106,7 +111,7 @@ async function handleFileUpload(
   });
 
   const url = `${baseUrl}/${slug}${extensionForMimeType(mimeType)}`;
-  const deleteUrl = `${baseUrl}/api/upload/${slug}`;
+  const deleteUrl = deletionUrlFor(baseUrl, slug);
   return reply.code(201).send({ url, deleteUrl });
 }
 
@@ -171,7 +176,7 @@ async function handlePaste(
   });
 
   const url = `${baseUrl}/${slug}`;
-  const deleteUrl = `${baseUrl}/api/upload/${slug}`;
+  const deleteUrl = deletionUrlFor(baseUrl, slug);
   return reply.code(201).send({ url, deleteUrl });
 }
 
@@ -202,7 +207,7 @@ async function handleShorten(
   });
 
   const url = `${baseUrl}/${slug}`;
-  const deleteUrl = `${baseUrl}/api/upload/${slug}`;
+  const deleteUrl = deletionUrlFor(baseUrl, slug);
   return reply.code(201).send({ url, deleteUrl });
 }
 
@@ -245,12 +250,55 @@ async function handleUpload(
     return handleFileUpload(reply, auth, baseUrl, file);
   }
 
-  const rawUrl = fields['url'];
+  const query = request.query as Record<string, unknown>;
+  const rawUrl = fields['url'] ?? (typeof query['url'] === 'string' ? query['url'] : null);
   if (rawUrl) {
     return handleShorten(reply, auth, baseUrl, rawUrl);
   }
 
   return reply.code(400).send({ error: 'No file part in request (expected field name "file")' });
+}
+
+async function findOwner(slug: string): Promise<string | null> {
+  if (slug.length === SHORT_SLUG_LENGTH) {
+    return (
+      (await prisma.shortUrl.findUnique({ where: { slug }, select: { userId: true } }))?.userId ??
+      null
+    );
+  }
+  if (slug.length === PASTE_SLUG_LENGTH) {
+    return (
+      (await prisma.paste.findUnique({ where: { slug }, select: { userId: true } }))?.userId ?? null
+    );
+  }
+  return (
+    (await prisma.upload.findUnique({ where: { slug }, select: { userId: true } }))?.userId ?? null
+  );
+}
+
+async function deleteEntity(slug: string): Promise<'short' | 'paste' | 'upload' | null> {
+  if (slug.length === SHORT_SLUG_LENGTH) {
+    const found = await prisma.shortUrl.findUnique({ where: { slug } });
+    if (!found) return null;
+    await prisma.shortUrl.delete({ where: { id: found.id } });
+    return 'short';
+  }
+
+  if (slug.length === PASTE_SLUG_LENGTH) {
+    const found = await prisma.paste.findUnique({ where: { slug } });
+    if (!found) return null;
+    await storage.delete(found.s3Key).catch(() => undefined);
+    await prisma.paste.delete({ where: { id: found.id } });
+    await delPastePageCache(found.slug);
+    return 'paste';
+  }
+
+  const found = await prisma.upload.findUnique({ where: { slug } });
+  if (!found) return null;
+  await storage.delete(found.s3Key).catch(() => undefined);
+  await prisma.upload.delete({ where: { id: found.id } });
+  await delUploadCache(found.slug);
+  return 'upload';
 }
 
 async function handleDelete(
@@ -263,37 +311,45 @@ async function handleDelete(
   const { slug } = request.params;
   if (!SLUG_PATTERN.test(slug)) return reply.code(404).send({ error: 'Not found' });
 
-  if (slug.length === SHORT_SLUG_LENGTH) {
-    const shortUrl = await prisma.shortUrl.findUnique({ where: { slug } });
-    if (!shortUrl) return reply.code(404).send({ error: 'Not found' });
-    if (shortUrl.userId !== auth.user.id) return reply.code(403).send({ error: 'Forbidden' });
+  const owner = await findOwner(slug);
+  if (!owner) return reply.code(404).send({ error: 'Not found' });
+  if (owner !== auth.user.id) return reply.code(403).send({ error: 'Forbidden' });
 
-    await prisma.shortUrl.delete({ where: { id: shortUrl.id } });
-    return reply.code(200).send({ ok: true });
-  }
-
-  if (slug.length === PASTE_SLUG_LENGTH) {
-    const paste = await prisma.paste.findUnique({ where: { slug } });
-    if (!paste) return reply.code(404).send({ error: 'Not found' });
-    if (paste.userId !== auth.user.id) return reply.code(403).send({ error: 'Forbidden' });
-
-    await storage.delete(paste.s3Key).catch(() => undefined);
-    await prisma.paste.delete({ where: { id: paste.id } });
-    await delPastePageCache(paste.slug);
-    return reply.code(200).send({ ok: true });
-  }
-
-  const upload = await prisma.upload.findUnique({ where: { slug } });
-  if (!upload) return reply.code(404).send({ error: 'Not found' });
-  if (upload.userId !== auth.user.id) return reply.code(403).send({ error: 'Forbidden' });
-
-  await storage.delete(upload.s3Key).catch(() => undefined);
-  await prisma.upload.delete({ where: { id: upload.id } });
-  await delUploadCache(upload.slug);
+  await deleteEntity(slug);
   return reply.code(200).send({ ok: true });
+}
+
+const DELETED_PAGE = (kind: 'short' | 'paste' | 'upload'): string => {
+  const label = kind === 'short' ? 'short link' : kind;
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>deleted — albbas</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#282828;color:#ebdbb2;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;text-align:center}h1{color:#fb4934;font-size:18px}p{color:#928374;font-size:14px}</style></head><body><div><h1>deleted</h1><p>the ${label} has been removed.</p></div></body></html>`;
+};
+
+async function handleBrowserDelete(
+  request: FastifyRequest<{ Params: { slug: string } }>,
+  reply: FastifyReply,
+): Promise<FastifyReply> {
+  const { slug } = request.params;
+  const sig = (request.query as Record<string, unknown>)['sig'];
+
+  if (!SLUG_PATTERN.test(slug) || typeof sig !== 'string' || sig.length === 0) {
+    return reply.code(401).type('text/plain').send('401: unauthorized');
+  }
+  if (!verifyDeletionSignature(slug, sig, env.ENCRYPTION_KEY)) {
+    return reply.code(401).type('text/plain').send('401: unauthorized');
+  }
+
+  const kind = await deleteEntity(slug);
+  if (!kind) return reply.code(404).type('text/plain').send('404: not found');
+
+  return reply
+    .code(200)
+    .type('text/html; charset=utf-8')
+    .header('cache-control', 'no-store')
+    .send(DELETED_PAGE(kind));
 }
 
 export function registerUploadRoutes(app: FastifyInstance): void {
   app.post('/api/upload', handleUpload);
   app.delete('/api/upload/:slug', handleDelete);
+  app.get('/api/upload/:slug', handleBrowserDelete);
 }

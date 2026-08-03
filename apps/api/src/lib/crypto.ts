@@ -2,6 +2,7 @@ import {
   createCipheriv,
   createDecipheriv,
   createHash,
+  createHmac,
   randomBytes,
   timingSafeEqual,
 } from 'node:crypto';
@@ -18,6 +19,14 @@ export function safeEqualHex(a: string, b: string): boolean {
   const left = Buffer.from(a, 'hex');
   const right = Buffer.from(b, 'hex');
   return left.length === right.length && left.length > 0 && timingSafeEqual(left, right);
+}
+
+export function deletionSignature(slug: string, secret: string): string {
+  return createHmac('sha256', secret).update(slug, 'utf8').digest('hex');
+}
+
+export function verifyDeletionSignature(slug: string, signature: string, secret: string): boolean {
+  return safeEqualHex(signature, deletionSignature(slug, secret));
 }
 
 export function encryptionKeyFromSecret(secret: string): Buffer {

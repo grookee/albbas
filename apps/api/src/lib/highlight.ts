@@ -102,6 +102,7 @@ export interface PastePageOptions {
   language: string;
   content: string;
   baseUrl: string;
+  webUrl: string;
   sizeBytes: number;
   createdAt: Date;
   visits: number;
@@ -167,7 +168,7 @@ body{background:var(--bg);color:var(--fg);font-family:ui-monospace,SFMono-Regula
 </head>
 <body>
 <div class="top">
-  <a class="brand" href="${opts.baseUrl}">albbas</a>
+  <a class="brand" href="${opts.webUrl}">albbas</a>
   <span class="langs">${language}</span>
   <span>${title}</span>
   <span class="spacer"></span>

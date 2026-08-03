@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
+  deletionSignature,
   decryptSecret,
   encryptionKeyFromSecret,
   encryptSecret,
   safeEqualHex,
   sha256Hex,
+  verifyDeletionSignature,
 } from './crypto.js';
 
 describe('sha256Hex', () => {
@@ -32,6 +34,30 @@ describe('safeEqualHex', () => {
 
   it('rejects empty input', () => {
     expect(safeEqualHex('', '')).toBe(false);
+  });
+});
+
+describe('deletionSignature / verifyDeletionSignature', () => {
+  const secret = 'test-encryption-key-0123456789-0123456789';
+
+  it('signs and verifies a slug', () => {
+    const sig = deletionSignature('abc12345', secret);
+    expect(sig).toMatch(/^[0-9a-f]{64}$/);
+    expect(verifyDeletionSignature('abc12345', sig, secret)).toBe(true);
+  });
+
+  it('binds the signature to the slug', () => {
+    const sig = deletionSignature('abc12345', secret);
+    expect(verifyDeletionSignature('otherslug', sig, secret)).toBe(false);
+  });
+
+  it('rejects a wrong secret and garbage', () => {
+    const sig = deletionSignature('abc12345', secret);
+    expect(verifyDeletionSignature('abc12345', sig, 'other-secret-0000000000000000000000000')).toBe(
+      false,
+    );
+    expect(verifyDeletionSignature('abc12345', 'garbage', secret)).toBe(false);
+    expect(verifyDeletionSignature('abc12345', '', secret)).toBe(false);
   });
 });
 
