@@ -20,7 +20,7 @@
     "@albbas/shared": "workspace:*",
     "@aws-sdk/client-s3": "^3.734.0",
     "@aws-sdk/lib-storage": "^3.734.0",
-    "@fastify/multipart": "^9.0.3",
+    "@fastify/multipart": "^10.1.0",
     "@node-rs/argon2": "^2.0.2",
     "@prisma/client": "^6.3.1",
     "@trpc/server": "^11.0.0",
